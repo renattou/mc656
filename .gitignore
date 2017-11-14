@@ -1,0 +1,12 @@
+# VS Code
+.vscode
+
+# C++ Files
+*.swp
+*.o
+
+# Project specific
+modelo
+pli-solver
+bnb
+heur
