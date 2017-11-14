@@ -127,16 +127,15 @@ int main(int argc, char **argv)
   // TODO change this part to heuristics ?
   best_sol.sol.resize(scenes);
   best_sol.scenes.resize(scenes);
-  int init[] = {0,1,2,3,4,5,6,7};
   for(int i=0; i < scenes; i++) {
-    best_sol.sol[i] = init[i];
+    best_sol.sol[i] = i;
     best_sol.scenes[i] = true;
   }
   best_sol.lactive = (scenes+1)/2;
   best_sol.ractive = (scenes-1)/2;
   best_sol.lower_bound = lower_bound(best_sol);
 
-  std::cout << "First: " << best_sol.sol << " | " << best_sol.lower_bound << "|left: " << best_sol.lactive << "|right: " << best_sol.ractive << std::endl;
+  // std::cout << "First: " << best_sol.sol << " | " << best_sol.lower_bound << "|left: " << best_sol.lactive << "|right: " << best_sol.ractive << std::endl;
 
   // Creates tree root with best solution so far
   sol_tree.push_back(solution(scenes));
@@ -154,25 +153,27 @@ int main(int argc, char **argv)
 
 int k1k2(solution& sol, std::vector<int>& sc)
 {
-  int lmost, rmost, partial;
+  int lmost, rmost, rlmost, lrmost, partial;
   int cost = 0;
 
   for(int i=0; i < actors; i++)
   {
-    lmost = rmost = -1;
+    lmost = rlmost = lrmost = rmost = -1;
     partial = 0;
 
     for(int j=0; j < sol.lactive; j++) {
       if(t[i][sol.sol[j]] == true) {
-        lmost = j;
-        break;
+        if(lmost == -1) lmost = j;
+
+        lrmost = j;
       }
     }
 
     for(int j=sol.sol.size()-1; j >= sol.ractive; j--) {
       if(t[i][sol.sol[j]] == true) {
-        rmost = j;
-        break;
+        if(rmost == -1) rmost = j;
+
+        rlmost = j;
       }
     }
 
@@ -180,10 +181,10 @@ int k1k2(solution& sol, std::vector<int>& sc)
       partial = (rmost - lmost + 1 - wdays[i]);
     }
     else if(lmost != -1) {
-      for(int j=lmost; j < sol.lactive; j++) partial += t[i][sol.sol[j]] ? 0 : 1;
+      for(int j=lmost+1; j < lrmost; j++) partial += (1 - (int)t[i][sol.sol[j]]);
     }
     else if(rmost != -1) {
-      for(int j=rmost; j >= sol.ractive; j--) partial += t[i][sol.sol[j]] ? 0 : 1;
+      for(int j=rmost-1; j > rlmost; j--) partial += (1 - (int)t[i][sol.sol[j]]);
     }
 
     cost += partial * costs[i];
@@ -221,7 +222,7 @@ int lower_bound(solution& sol)
 // TODO
 int score(solution& sol)
 {
-  return lower_bound(sol);
+  return sol.lower_bound;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -235,11 +236,10 @@ void explore()
     std::pop_heap(sol_tree.begin(), sol_tree.end());
     sol_tree.pop_back();
 
+    // std::cout << "exploring: " << node.sol << " | " << node.lower_bound << "|left: " << node.lactive << "|right: " << node.ractive << std::endl;
+
     // If we've found a possible solution
     if(node.lactive >= node.ractive) {
-
-        std::cout << "exploring: " << node.sol << " | " << node.lower_bound << "|left: " << node.lactive << "|right: " << node.ractive << std::endl;
-
         // If the solution is actually better
         if(node.lower_bound < best_sol.lower_bound) {
           // the solution is actually better
@@ -249,7 +249,7 @@ void explore()
     // We are still on the search
     else {
       // Computes insertion index in the new solutions to be explored;
-      int idx = (node.lactive == node.sol.size() - node.ractive) ? ++node.lactive-1 : --node.ractive;
+      int idx = (node.lactive == (int)node.sol.size() - node.ractive) ? ++node.lactive-1 : --node.ractive;
 
       // keeps tree size for later use
       int it = sol_tree.size();
@@ -270,13 +270,13 @@ void explore()
 
             sol_tree.push_back(new_node);
           } else {
-            std::cout << "Discarding solution " << new_node.sol << "| lower_bound" << new_node.lower_bound << std::endl;
+            // std::cout << "Discarding solution " << new_node.sol << "| lower_bound " << new_node.lower_bound << "| lactive " << new_node.lactive << "| ractive " << new_node.ractive << " | best_sol.lower " << best_sol.lower_bound << std::endl;
           }
         }
       }
 
       // updates heap with freshly added nodes
-      for(it = std::max(it, 1); it <= sol_tree.size(); it++) {
+      for(it = std::max(it, 1); it <= (int)sol_tree.size(); it++) {
         std::push_heap(sol_tree.begin(), sol_tree.begin()+it);
       }
     }
