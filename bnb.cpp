@@ -10,63 +10,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <bits/stdc++.h>
-
-////////////////////////////////////////////////////////////////////////////////
-// This class is the used class in the generic solution for the bnb algorithm
-// It uses the score and evaluate functions to define how the bnb algorithm will
-// walk through the solution tree
-class solution
-{
-public:
-  std::vector<bool> scenes; // 1 if scene in this solution, 0 otherwise
-  std::vector<int> sol; // solution array
-  int lactive, ractive; // end and start indices for left and right sets
-  int lower_bound;      // solution's lower bound. It's the solution cost if lactive == ractive
-  int score;            // solution's score
-
-  solution() {}
-  solution(int elems) : sol(elems, -1), scenes(elems, false), lactive(0), ractive(elems), lower_bound(0), score(0) {}
-  solution(const std::vector<int>& sol, const std::vector<bool>& scenes, int lactive, int ractive, int lower_bound, int score) :
-    sol(sol), scenes(scenes), lactive(lactive), ractive(ractive), lower_bound(lower_bound), score(score) {}
-  solution(const solution& other) { *this = other; }
-
-  // Copies a solution
-  solution& operator=(const solution& other);
-
-  // Indexer operator
-  inline int operator[](int index) { return this->sol[index]; }
-
-  bool operator<(const solution& other);
-};
-
-bool solution::operator<(const solution& other)
-{
-  // if the score of the two are equal, prefer the one closest to the leafs
-  if(this->score == other.score)
-    return this->lactive < other.lactive;
-  else
-    return this->score < other.score;
-}
-
-solution& solution::operator=(const solution& other)
-{
-  this->lactive = other.lactive;
-  this->ractive = other.ractive;
-  this->lower_bound = other.lower_bound;
-  this->score = other.score;
-
-  this->sol = other.sol;
-  this->scenes = other.scenes;
-
-  return *this;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-// Auxiliary functions
-template< typename T > std::ostream& operator<<(std::ostream& out, const std::vector<T>& v);
-void print_and_exit(int signum=0);
-void update_solution(const solution& new_node);
+#include "common.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////
 // BnB functions
@@ -75,13 +19,6 @@ void explore();
 
 ////////////////////////////////////////////////////////////////////////////////
 // Global variables
-std::mutex sol_lock;  // Solution mutex
-solution best_sol; // best solution so far
-
-std::vector<std::vector<bool>> t; // t matrix
-std::vector<int> costs, wdays; // cost array for each actor
-int scenes, actors; // number of scenes and actors
-
 // Solutions tree. Each node is made of a solution and it's lower bound.
 // In the leafs, the lower bound equals the cost of that solution
 std::vector<solution> sol_tree;
@@ -93,35 +30,8 @@ int main(int argc, char **argv)
   // Signal handling
   signal(SIGINT, print_and_exit);
 
-  // Lets read the input
-  std::ifstream input(argv[1], std::ios_base::in);
-
-  // Reads parameters (scenes, actors)
-  input >> scenes >> actors;
-  // Reads scenesXactors matrix
-  t.resize(actors);
-  wdays.assign(actors, 0);
-  for(int i=0; i < actors; i++) {
-    t[i].resize(scenes);
-    for(int j=0; j < scenes; j++) {
-      bool isin;
-
-      input >> isin;
-      t[i][j] = isin;
-
-      if(isin) wdays[i]++; // total number of working days per actor
-    }
-  }
-  // Reads actors costs
-  costs.resize(actors);
-  for(int i=0; i < actors; i++) {
-    int c;
-
-    input >> c;
-    costs[i] = c;
-  }
-
-  // Read is finished, lets run the algorithm
+  // Read from input file
+  read_input(argv[1]);
 
   // Lets start by setting a best solution at first
   // TODO change this part to heuristics ?
@@ -281,43 +191,6 @@ void explore()
       }
     }
   }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-// Prints vector to output
-template< typename T >
-std::ostream& operator<<(std::ostream& out, const std::vector<T>& v)
-{
-  for(const auto& s: v) out << s << " ";
-
-  return out;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-// prints solution and exits
-void print_and_exit(int signum)
-{
-  // Acquires lock
-  sol_lock.lock();
-  // prints solution
-  std::cout << best_sol.sol << std::endl << best_sol.lower_bound << std::endl;
-
-  // exit
-  exit(EXIT_SUCCESS);
-
-  // should never reach this point
-  sol_lock.unlock();
-}
-
-////////////////////////////////////////////////////////////////////////////////
-// Updates the solution in a safe way with lockers !!!
-void update_solution(const solution& newsol)
-{
-  sol_lock.lock();
-
-  best_sol = newsol;
-
-  sol_lock.unlock();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
