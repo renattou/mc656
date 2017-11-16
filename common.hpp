@@ -32,7 +32,6 @@ public:
 
 ////////////////////////////////////////////////////////////////////////////////
 // Auxiliary functions
-template< typename T > std::ostream& operator<<(std::ostream& out, const std::vector<T>& v);
 void read_input(char *filename);
 void print_and_exit(int signum=0);
 void update_solution(const solution& new_node);
@@ -55,6 +54,15 @@ extern std::vector<solution> sol_tree;
 extern bool is_bnb;
 
 ////////////////////////////////////////////////////////////////////////////////
+
+template< typename T > std::ostream& operator<<(std::ostream& out, const std::vector<T>& v)
+{
+  for(const T& s: v) out << s+1 << " ";
+
+  return out;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 #endif /*! COMMON_HPP */
 

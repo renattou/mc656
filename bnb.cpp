@@ -202,6 +202,8 @@ void explore()
 {
   while(sol_tree.size() > 0 && sol_tree.front().lower_bound < best_sol.lower_bound)
   {
+
+
     // Pops head from the priority queue
     solution node = sol_tree.front();
     std::pop_heap(sol_tree.begin(), sol_tree.end());
@@ -211,37 +213,43 @@ void explore()
     nexplored++;
 
     // If we've found a possible solution
-    if(node.comp.size() == 0) {
-        // If the solution is actually better
-        if(node.lower_bound < best_sol.lower_bound) {
-          // the solution is actually better
-          update_solution(node);
-        }
-    }
-    // We are still on the search
-    else {
-      // Computes insertion index in the new solutions to be explored;
-      int idx = (node.lactive == (int)node.sol.size() - node.ractive) ? ++node.lactive-1 : --node.ractive;
+    if(node.comp.size() == 0)
+    {
+      // If the solution is actually better
+      if(node.lower_bound < best_sol.lower_bound) {
+        // the solution is actually better
+        update_solution(node);
+      }
+    } else
+    {
+      int st_size = sol_tree.size(), idx = -1, min = -1;
 
-      // keeps tree size for later use
-      int it = sol_tree.size();
+      if(node.lactive == (int)node.sol.size() - node.ractive) {
+        idx = ++node.lactive-1;
+      } else {
+        idx = --node.ractive;
+        min = (node.ractive == node.sol.size()-1) ? node.sol[node.lactive-1] : -1;
+      }
 
       // for each possible scene, creates a new solution with it and inserts it
       // into the solution tree if its lower bound allows
       for(int it=0; it < node.comp.size(); it++) {
         int scene = node.comp[it];
-        solution new_node(node);
 
-        new_node.comp.erase(new_node.comp.begin()+it, new_node.comp.begin()+it+1);
-        new_node.sol[idx] = scene;
-        new_node.lower_bound = lower_bound(new_node);
+        if(min < scene) { // breaks simetry
+          solution new_node(node);
 
-        // mature node condition
-        if(new_node.lower_bound < best_sol.lower_bound) sol_tree.push_back(new_node);
+          new_node.comp.erase(new_node.comp.begin()+it, new_node.comp.begin()+it+1);
+          new_node.sol[idx] = scene;
+          new_node.lower_bound = lower_bound(new_node);
+
+          // mature node condition
+          if(new_node.lower_bound < best_sol.lower_bound) sol_tree.push_back(new_node);
+        }
       }
 
       // updates heap with freshly added nodes
-      for(it = std::max(it, 1); it <= (int)sol_tree.size(); it++) {
+      for(int it = std::max(st_size, 1); it <= (int)sol_tree.size(); it++) {
         std::push_heap(sol_tree.begin(), sol_tree.begin()+it);
       }
     }

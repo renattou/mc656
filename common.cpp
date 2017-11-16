@@ -48,14 +48,6 @@ std::vector<solution> sol_tree; // solution tree (min-heap)
 bool is_bnb = false;
 
 ////////////////////////////////////////////////////////////////////////////////
-// Prints vector to output
-template< typename T >
-std::ostream& operator<<(std::ostream& out, const std::vector<T>& v)
-{
-  for(const auto& s: v) out << s+1 << " ";
-
-  return out;
-}
 
 void read_input(char *filename)
 {
