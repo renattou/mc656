@@ -35,7 +35,7 @@ public:
   solution& operator=(const solution& other);
 
   // Indexer operator
-  inline int operator[](int index) { return this->sol[index]; }
+  inline int& operator[](int index) { return this->sol[index]; }
 
   bool operator<(const solution& other);
 };
@@ -80,7 +80,8 @@ solution best_sol; // best solution so far
 
 std::vector<std::vector<bool>> t; // t matrix
 std::vector<int> costs, wdays; // cost array for each actor
-int scenes, actors; // number of scenes and actors
+int nscenes, nactors; // number of scenes and actors
+int nexplored = 0; // Number of explored nodes
 
 // Solutions tree. Each node is made of a solution and it's lower bound.
 // In the leafs, the lower bound equals the cost of that solution
@@ -97,13 +98,13 @@ int main(int argc, char **argv)
   std::ifstream input(argv[1], std::ios_base::in);
 
   // Reads parameters (scenes, actors)
-  input >> scenes >> actors;
+  input >> nscenes >> nactors;
   // Reads scenesXactors matrix
-  t.resize(actors);
-  wdays.assign(actors, 0);
-  for(int i=0; i < actors; i++) {
-    t[i].resize(scenes);
-    for(int j=0; j < scenes; j++) {
+  t.resize(nactors);
+  wdays.assign(nactors, 0);
+  for(int i=0; i < nactors; i++) {
+    t[i].resize(nscenes);
+    for(int j=0; j < nscenes; j++) {
       bool isin;
 
       input >> isin;
@@ -113,8 +114,8 @@ int main(int argc, char **argv)
     }
   }
   // Reads actors costs
-  costs.resize(actors);
-  for(int i=0; i < actors; i++) {
+  costs.resize(nactors);
+  for(int i=0; i < nactors; i++) {
     int c;
 
     input >> c;
@@ -125,20 +126,20 @@ int main(int argc, char **argv)
 
   // Lets start by setting a best solution at first
   // TODO change this part to heuristics ?
-  best_sol.sol.resize(scenes);
-  best_sol.scenes.resize(scenes);
-  for(int i=0; i < scenes; i++) {
+  best_sol.sol.resize(nscenes);
+  best_sol.scenes.resize(nscenes);
+  for(int i=0; i < nscenes; i++) {
     best_sol.sol[i] = i;
     best_sol.scenes[i] = true;
   }
-  best_sol.lactive = (scenes+1)/2;
-  best_sol.ractive = (scenes-1)/2;
+  best_sol.lactive = (nscenes+1)/2;
+  best_sol.ractive = (nscenes-1)/2;
   best_sol.lower_bound = lower_bound(best_sol);
 
   // std::cout << "First: " << best_sol.sol << " | " << best_sol.lower_bound << "|left: " << best_sol.lactive << "|right: " << best_sol.ractive << std::endl;
 
-  // Creates tree root with best solution so far
-  sol_tree.push_back(solution(scenes));
+  // Creates tree root with empty solution
+  sol_tree.push_back(solution(nscenes));
 
   // Explores solution tree and updates best solution so far
   explore();
@@ -151,12 +152,12 @@ int main(int argc, char **argv)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-int k1k2(solution& sol, std::vector<int>& sc)
+int k1k2(solution& sol, std::vector<int>& bl, std::vector<int>& br)
 {
   int lmost, rmost, rlmost, lrmost, partial;
   int cost = 0;
 
-  for(int i=0; i < actors; i++)
+  for(int i=0; i < nactors; i++)
   {
     lmost = rlmost = lrmost = rmost = -1;
     partial = 0;
@@ -182,9 +183,13 @@ int k1k2(solution& sol, std::vector<int>& sc)
     }
     else if(lmost != -1) {
       for(int j=lmost+1; j < lrmost; j++) partial += (1 - (int)t[i][sol.sol[j]]);
+
+      if(partial > 0) bl.push_back(i);
     }
     else if(rmost != -1) {
       for(int j=rmost-1; j > rlmost; j--) partial += (1 - (int)t[i][sol.sol[j]]);
+
+      if(partial > 0) br.push_back(i);
     }
 
     cost += partial * costs[i];
@@ -193,27 +198,99 @@ int k1k2(solution& sol, std::vector<int>& sc)
   return cost;
 }
 
-int k3(solution& sol, std::vector<int>& sc)
+void compute_Q(solution& sol, std::vector<int>& bl, std::vector<std::pair<int, int>>& Q)
 {
-  return 0;
+  // List of tuples for (scene id, actors in the scene, scene cost)
+  std::vector<std::tuple<int, std::vector<int>, int>> candidates;
+
+  // Computes number of actors in bl per scene
+  for(int scene=0; scene < nscenes; scene++) {
+    if(sol.scenes[scene] == false)
+    {
+      candidates.push_back(std::make_tuple(scene, std::vector<int>(), 0));
+
+      for(int i=0; i < (int)bl.size(); i++) {
+        int actor = bl[i];
+
+        if(t[actor][scene]) {
+          std::get<1>(candidates.back()).push_back(actor);
+          std::get<2>(candidates.back()) += costs[actor];
+        }
+      }
+    }
+  }
+
+  // Sorts scenes in increasing order of number of actors per scene
+  using elem_t = std::tuple<int, std::vector<int>, int>;
+  std::sort(candidates.begin(), candidates.end(), [](const elem_t& i, const elem_t& j) { return std::get<1>(i).size() < std::get<1>(j).size(); });
+
+  // Now lets set the Q set.
+
+  // It serves for not adding two scenes with the same actor to Q
+  std::vector<bool> used_actors(nactors, false);
+  // iterates over the scenes candidates
+  for(auto& candidate: candidates)
+  {
+    int scene = std::get<0>(candidate); // scene id
+    bool add_scene = true; // always try to add scene
+    std::vector<int>& actors = std::get<1>(candidate); // actors in that scene
+    int cost = std::get<2>(candidate);
+
+    // Checks if an actor was used in this scene before
+    for(int actor: actors) { if(used_actors[actor]) { add_scene = false; break; } }
+
+    // If none of the actors of this scene were used yet, try adding the scene
+    if(add_scene) {
+      Q.push_back(std::make_pair(scene, cost)); // adds the scene
+      for(int actor: actors) used_actors[actor] = true; // adds to used actors
+    }
+  }
+
+  using q_t = std::pair<int, int>;
+  std::sort(Q.begin(), Q.end(), [](const q_t& i, const q_t& j) { return i.second > j.second; });
 }
 
-int k4(solution& sol, std::vector<int>& sc)
+int k3(solution& sol, std::vector<int>& bl)
 {
-  return 0;
+  std::vector<std::pair<int, int>> Q;
+  int cost = 0;
+
+  // Computes Q according to the description of the problem in decreasing weight
+  compute_Q(sol, bl, Q);
+
+  for(int i=0; i < (int)Q.size(); i++)
+  {
+    cost += i * Q[i].second;
+  }
+
+  return cost;
+}
+
+int k4(solution& sol, std::vector<int>& br)
+{
+  std::vector<std::pair<int, int>> Q;
+  int cost = 0;
+
+  // Computes Q according to the description of the problem in decreasing weight
+  compute_Q(sol, br, Q);
+
+  for(int i=0; i < (int)Q.size(); i++)
+  {
+    cost += i * Q[i].second;
+  }
+
+  return cost;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // TODO
 int lower_bound(solution& sol)
 {
-  std::vector<int> sc(scenes);
+  std::vector<int> bl, br;
 
-  for(int i=0; i < scenes; i++) sc[i] = i;
-
-  int bound = k1k2(sol, sc);
-  bound += k3(sol, sc);
-  bound += k4(sol, sc);
+  int bound = k1k2(sol, bl, br);
+  bound += k3(sol, bl);
+  bound += k4(sol, br);
 
   return bound;
 }
@@ -236,6 +313,9 @@ void explore()
     std::pop_heap(sol_tree.begin(), sol_tree.end());
     sol_tree.pop_back();
 
+    // Number of explored nodes
+    nexplored++;
+
     // std::cout << "exploring: " << node.sol << " | " << node.lower_bound << "|left: " << node.lactive << "|right: " << node.ractive << std::endl;
 
     // If we've found a possible solution
@@ -256,7 +336,7 @@ void explore()
 
       // for each possible scene, creates a new solution with it and inserts it
       // into the solution tree if its lower bound allows
-      for(int sc=0; sc < scenes; sc++) {
+      for(int sc=0; sc < nscenes; sc++) {
         if(node.scenes[sc] == false) {
           solution new_node(node);
 
@@ -301,6 +381,8 @@ void print_and_exit(int signum)
   sol_lock.lock();
   // prints solution
   std::cout << best_sol.sol << std::endl << best_sol.lower_bound << std::endl;
+
+  std::cout << "Number of explored nodes " << nexplored << std::endl;
 
   // exit
   exit(EXIT_SUCCESS);
