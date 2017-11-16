@@ -1,14 +1,24 @@
+////////////////////////////////////////////////////////////////////////////////
+
 #include "common.hpp"
+
+////////////////////////////////////////////////////////////////////////////////
+
+solution::solution(int elems) :
+  sol(elems, -1), comp(elems, 0), lactive(0), ractive(elems), lower_bound(0)
+{
+  for(int i=0; i < elems; i++) this->comp[i] = i;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // Operator overrides for solution class
 bool solution::operator<(const solution& other)
 {
-  // if the score of the two are equal, prefer the one closest to the leafs
-  if(this->score == other.score)
+  // if the lower_bound of the two are equal, prefer the one closest to the leafs
+  if(this->lower_bound == other.lower_bound)
     return this->lactive < other.lactive;
   else
-    return this->score < other.score;
+    return this->lower_bound > other.lower_bound;
 }
 
 solution& solution::operator=(const solution& other)
@@ -16,10 +26,9 @@ solution& solution::operator=(const solution& other)
   this->lactive = other.lactive;
   this->ractive = other.ractive;
   this->lower_bound = other.lower_bound;
-  this->score = other.score;
 
   this->sol = other.sol;
-  this->scenes = other.scenes;
+  this->comp = other.comp;
 
   return *this;
 }
@@ -33,12 +42,16 @@ std::vector<std::vector<bool>> t; // t matrix
 std::vector<int> costs, wdays; // cost array for each actor
 int nscenes, nactors; // number of scenes and actors
 
+std::vector<solution> sol_tree; // solution tree (min-heap)
+
+bool is_bnb = false;
+
 ////////////////////////////////////////////////////////////////////////////////
 // Prints vector to output
 template< typename T >
 std::ostream& operator<<(std::ostream& out, const std::vector<T>& v)
 {
-  for(const auto& s: v) out << s << " ";
+  for(const auto& s: v) out << s+1 << " ";
 
   return out;
 }
@@ -85,6 +98,12 @@ void print_and_exit(int signum)
 
   // Prints solution
   std::cout << best_sol.sol << std::endl << best_sol.lower_bound << std::endl;
+
+  if(is_bnb) {
+    int dual = sol_tree.size() > 0 ? sol_tree.front().lower_bound : best_sol.lower_bound;
+
+    std::cout << std::min(best_sol.lower_bound, dual) << std::endl;
+  }
 
   // Exits
   exit(EXIT_SUCCESS);

@@ -19,17 +19,15 @@ void explore();
 
 ////////////////////////////////////////////////////////////////////////////////
 // Global variables
-// Solutions tree. Each node is made of a solution and it's lower bound.
-// In the leafs, the lower bound equals the cost of that solution
-std::vector<solution> sol_tree;
-
-// Number of explored nodes
 int nexplored = 0;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Main function. Reads input and call other methods
 int main(int argc, char **argv)
 {
+  // Sets output format to branch and bound
+  is_bnb = true;
+
   // Signal handling
   signal(SIGINT, print_and_exit);
 
@@ -39,16 +37,12 @@ int main(int argc, char **argv)
   // Lets start by setting a best solution at first
   // TODO change this part to heuristics ?
   best_sol.sol.resize(nscenes);
-  best_sol.scenes.resize(nscenes);
   for(int i=0; i < nscenes; i++) {
     best_sol.sol[i] = i;
-    best_sol.scenes[i] = true;
   }
   best_sol.lactive = (nscenes+1)/2;
   best_sol.ractive = (nscenes-1)/2;
   best_sol.lower_bound = lower_bound(best_sol);
-
-  // std::cout << "First: " << best_sol.sol << " | " << best_sol.lower_bound << "|left: " << best_sol.lactive << "|right: " << best_sol.ractive << std::endl;
 
   // Creates tree root with empty solution
   sol_tree.push_back(solution(nscenes));
@@ -115,19 +109,17 @@ void compute_Q(solution& sol, std::vector<int>& bl, std::vector<std::pair<int, i
   // List of tuples for (scene id, actors in the scene, scene cost)
   std::vector<std::tuple<int, std::vector<int>, int>> candidates;
 
+  // Reserves right size for candidates
+  candidates.reserve(sol.comp.size());
+
   // Computes number of actors in bl per scene
-  for(int scene=0; scene < nscenes; scene++) {
-    if(sol.scenes[scene] == false)
-    {
-      candidates.push_back(std::make_tuple(scene, std::vector<int>(), 0));
+  for(int scene: sol.comp) {
+    candidates.push_back(std::make_tuple(scene, std::vector<int>(), 0));
 
-      for(int i=0; i < (int)bl.size(); i++) {
-        int actor = bl[i];
-
-        if(t[actor][scene]) {
-          std::get<1>(candidates.back()).push_back(actor);
-          std::get<2>(candidates.back()) += costs[actor];
-        }
+    for(int actor: bl) {
+      if(t[actor][scene]) {
+        std::get<1>(candidates.back()).push_back(actor);
+        std::get<2>(candidates.back()) += costs[actor];
       }
     }
   }
@@ -195,7 +187,8 @@ int k4(solution& sol, std::vector<int>& br)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// TODO
+// Computes the lower bound by using the function described on the pdf by
+// computing the acummulated sum of k1,k2,k3 and k4.
 int lower_bound(solution& sol)
 {
   std::vector<int> bl, br;
@@ -208,17 +201,10 @@ int lower_bound(solution& sol)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// TODO
-int score(solution& sol)
-{
-  return sol.lower_bound;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
+// Explores the solution tree by using branch and bound - best fit
 void explore()
 {
-  while(sol_tree.size() > 0)
+  while(sol_tree.size() > 0 && sol_tree.front().lower_bound < best_sol.lower_bound)
   {
     // Pops head from the priority queue
     solution node = sol_tree.front();
@@ -228,10 +214,8 @@ void explore()
     // Number of explored nodes
     nexplored++;
 
-    // std::cout << "exploring: " << node.sol << " | " << node.lower_bound << "|left: " << node.lactive << "|right: " << node.ractive << std::endl;
-
     // If we've found a possible solution
-    if(node.lactive >= node.ractive) {
+    if(node.comp.size() == 0) {
         // If the solution is actually better
         if(node.lower_bound < best_sol.lower_bound) {
           // the solution is actually better
@@ -248,23 +232,16 @@ void explore()
 
       // for each possible scene, creates a new solution with it and inserts it
       // into the solution tree if its lower bound allows
-      for(int sc=0; sc < nscenes; sc++) {
-        if(node.scenes[sc] == false) {
-          solution new_node(node);
+      for(int it=0; it < node.comp.size(); it++) {
+        int scene = node.comp[it];
+        solution new_node(node);
 
-          new_node.scenes[sc] = true;
-          new_node.sol[idx] = sc;
-          new_node.lower_bound = lower_bound(new_node);
+        new_node.comp.erase(new_node.comp.begin()+it, new_node.comp.begin()+it+1);
+        new_node.sol[idx] = scene;
+        new_node.lower_bound = lower_bound(new_node);
 
-          // mature node condition
-          if(new_node.lower_bound < best_sol.lower_bound) {
-            new_node.score = score(new_node);
-
-            sol_tree.push_back(new_node);
-          } else {
-            // std::cout << "Discarding solution " << new_node.sol << "| lower_bound " << new_node.lower_bound << "| lactive " << new_node.lactive << "| ractive " << new_node.ractive << " | best_sol.lower " << best_sol.lower_bound << std::endl;
-          }
-        }
+        // mature node condition
+        if(new_node.lower_bound < best_sol.lower_bound) sol_tree.push_back(new_node);
       }
 
       // updates heap with freshly added nodes
@@ -273,6 +250,8 @@ void explore()
       }
     }
   }
+
+  std::cerr << "number of explored nodes " << nexplored << std::endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
