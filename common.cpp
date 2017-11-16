@@ -41,6 +41,7 @@ solution best_sol; // best solution so far
 std::vector<std::vector<bool>> t; // t matrix
 std::vector<int> costs, wdays; // cost array for each actor
 int nscenes, nactors; // number of scenes and actors
+int nexplored = 0; // number of explored nodes
 
 std::vector<solution> sol_tree; // solution tree (min-heap)
 
@@ -103,6 +104,7 @@ void print_and_exit(int signum)
     int dual = sol_tree.size() > 0 ? sol_tree.front().lower_bound : best_sol.lower_bound;
 
     std::cout << std::min(best_sol.lower_bound, dual) << std::endl;
+    std::cout << nexplored << std::endl;
   }
 
   // Exits
