@@ -4,10 +4,10 @@ CXXFLAGS=-O3 -std=c++11
 
 all: bnb heur
 
-bnb: bnb.cpp
+bnb: bnb.cpp common.cpp simmulated_anneling.cpp
 	$(CC) $(CXXFLAGS) bnb.cpp common.cpp simmulated_anneling.cpp -o bnb
 
-heur: heur.cpp
+heur: heur.cpp common.cpp simmulated_anneling.cpp
 	$(CC) $(CXXFLAGS) heur.cpp common.cpp simmulated_anneling.cpp -o heur
 
 pli-solver: pli-solver.c

@@ -19,8 +19,14 @@
 // Completes solution sol with a greedy approach
 void greedy_solution(solution& sol);
 
+// Completes solution sol with a random approach
+void random_solution(solution& sol);
+
 // Performs simmulated_anneling meta heuristics
 void simmulated_anneling(float time_max);
+
+// Performs genetic algorithm meta heuristics
+void genetic_algorithm(float time_max);
 
 ////////////////////////////////////////////////////////////////////////////////
 
