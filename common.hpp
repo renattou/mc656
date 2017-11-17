@@ -43,6 +43,7 @@ extern solution best_sol; // best solution so far
 
 extern std::vector<std::vector<bool>> t; // t matrix
 extern std::vector<int> costs, wdays; // cost array for each actor
+extern std::vector<int> scene_costs; // total cost array for each scene
 extern int nscenes, nactors; // number of scenes and actors
 extern long long unsigned nexplored; // number of explored nodes on tree
 

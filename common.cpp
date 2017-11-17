@@ -40,6 +40,7 @@ solution best_sol; // best solution so far
 
 std::vector<std::vector<bool>> t; // t matrix
 std::vector<int> costs, wdays; // cost array for each actor
+std::vector<int> scene_costs; // total cost array for each day
 int nscenes, nactors; // number of scenes and actors
 long long unsigned nexplored = 0; // number of explored nodes
 
@@ -79,6 +80,17 @@ void read_input(char *filename)
 
     input >> c;
     costs[i] = c;
+  }
+
+  // Calculate total cost for each day
+  scene_costs.resize(nscenes);
+  for(int j=0; j < nscenes; j++) {
+    scene_costs[j] = 0;
+    for(int i=0; i < nactors; i++) {
+      if (t[i][j]) {
+        scene_costs[j] += costs[i];
+      }
+    }
   }
 }
 
