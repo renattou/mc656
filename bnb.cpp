@@ -200,10 +200,10 @@ int lower_bound(solution& sol)
 // Explores the solution tree by using branch and bound - best fit
 void explore()
 {
+  int mem = 1; // used at memory management
+
   while(sol_tree.size() > 0 && sol_tree.front().lower_bound < best_sol.lower_bound)
   {
-
-
     // Pops head from the priority queue
     solution node = sol_tree.front();
     std::pop_heap(sol_tree.begin(), sol_tree.end());
@@ -252,6 +252,22 @@ void explore()
       for(int it = std::max(st_size, 1); it <= (int)sol_tree.size(); it++) {
         std::push_heap(sol_tree.begin(), sol_tree.begin()+it);
       }
+    }
+
+    // Try not to take too much memory by removing some inactive nodes from
+    // time to time
+    if(nexplored/mem > 1e5 && sol_tree.size() > 5e5)
+    {
+      mem++;
+
+      for(int i=sol_tree.size()-1; i >= 0; i--) {
+        if(sol_tree[i].lower_bound >= best_sol.lower_bound)
+          sol_tree.erase(sol_tree.begin()+i, sol_tree.begin()+i+1);
+      }
+
+      std::make_heap(sol_tree.begin(), sol_tree.end());
+
+      std::cerr << "After removal " << sol_tree.size() << std::endl;
     }
   }
 }

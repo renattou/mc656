@@ -44,7 +44,7 @@ extern solution best_sol; // best solution so far
 extern std::vector<std::vector<bool>> t; // t matrix
 extern std::vector<int> costs, wdays; // cost array for each actor
 extern int nscenes, nactors; // number of scenes and actors
-extern int nexplored; // number of explored nodes on tree
+extern long long unsigned nexplored; // number of explored nodes on tree
 
 // Necessary for branch and bound algorithm
 // Solutions tree. Each node is made of a solution and it's lower bound.

@@ -41,7 +41,7 @@ solution best_sol; // best solution so far
 std::vector<std::vector<bool>> t; // t matrix
 std::vector<int> costs, wdays; // cost array for each actor
 int nscenes, nactors; // number of scenes and actors
-int nexplored = 0; // number of explored nodes
+long long unsigned nexplored = 0; // number of explored nodes
 
 std::vector<solution> sol_tree; // solution tree (min-heap)
 
