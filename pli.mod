@@ -32,6 +32,7 @@ s.t. actor_cene_day{i in ATORES, l in DIAS}: sum{j in CENAS} T[i, j] * p[j, l] =
 s.t. first_day{i in ATORES, l in DIAS}: e[i] <= n + (l-n)*x[i,l]; /* primeiro dia do ator i (faz o minimo de todos os indices) */
 s.t. last_day{i in ATORES, l in DIAS}: d[i] >= l*x[i,l]; /* ultimo dia do ator i (faz o maximo de todos os indices) */
 s.t. wait{i in ATORES}: d[i] - e[i] + 1 - s[i] = h[i]; /* dias ociosos do ator i */
+s.t. sem_simetria {j in CENAS}: sum{i in {1..j}} p[i,n] <= 1 - p[j,1]; 
 
 /* resolve problema */
 solve;

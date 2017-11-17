@@ -33,7 +33,7 @@ int main(int argc, char **argv)
 
   // Lets do our heuristics first to find a good bound for the algorithm
   simmulated_anneling(3000);
-  
+
   // Creates tree root with empty solution
   sol_tree.push_back(solution(nscenes));
 
