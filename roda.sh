@@ -115,7 +115,7 @@ then
         then
             continue
         fi
-        saida=`/usr/bin/time -o /dev/stdout -a -f %e --quiet timeout -s SIGINT --preserve-status -k $TTOL $TLIM_BNB ./bnb "$dir_original$dir_instancias$inst" | tee /dev/tty | tail -5`
+        saida=`/usr/bin/time -o /dev/stdout -a -f %e timeout -s SIGINT --preserve-status -k $TTOL $TLIM_BNB ./bnb "$dir_original$dir_instancias$inst" | tee /dev/tty | tail -5`
         num_linhas=`echo "$saida" | wc -l`
         if [ "$num_linhas" != 5 ]
         then

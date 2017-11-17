@@ -11,6 +11,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "common.hpp"
+#include "simmulated_anneling.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////
 // BnB functions
@@ -30,16 +31,9 @@ int main(int argc, char **argv)
   // Read from input file
   read_input(argv[1]);
 
-  // Lets start by setting a best solution at first
-  // TODO change this part to heuristics ?
-  best_sol.sol.resize(nscenes);
-  for(int i=0; i < nscenes; i++) {
-    best_sol.sol[i] = i;
-  }
-  best_sol.lactive = (nscenes+1)/2;
-  best_sol.ractive = (nscenes-1)/2;
-  best_sol.lower_bound = lower_bound(best_sol);
-
+  // Lets do our heuristics first to find a good bound for the algorithm
+  simmulated_anneling(3000);
+  
   // Creates tree root with empty solution
   sol_tree.push_back(solution(nscenes));
 
@@ -243,8 +237,15 @@ void explore()
           new_node.sol[idx] = scene;
           new_node.lower_bound = lower_bound(new_node);
 
+          solution greedy(new_node);
+
+          // Asks for a greedy solution
+          greedy_solution(greedy);
+
           // mature node condition
-          if(new_node.lower_bound < best_sol.lower_bound) sol_tree.push_back(new_node);
+          if(new_node.lower_bound < greedy.lower_bound && new_node.lower_bound < best_sol.lower_bound) sol_tree.push_back(new_node);
+          // If greedy is better than current, update best solution so far
+          if(greedy.lower_bound < best_sol.lower_bound) update_solution(greedy);
         }
       }
 
@@ -267,7 +268,7 @@ void explore()
 
       std::make_heap(sol_tree.begin(), sol_tree.end());
 
-      std::cerr << "After removal " << sol_tree.size() << std::endl;
+      // std::cerr << "After removal " << sol_tree.size() << std::endl;
     }
   }
 }
