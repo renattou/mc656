@@ -25,24 +25,30 @@ const float CROSSOVER_RATE = 0.5f; // Min percentage of genes to be preserved on
 int get_cost(solution& sol)
 {
   int cost = 0;
+  // Calculates cost for each actor
   for (int i = 0; i < nactors; i++) {
     int first_day = 0, last_day = nscenes - 1;
+    // Finds first day of work
     for (int j = 0; j < nscenes; j++) {
       if (t[i][sol.sol[j]]) {
         first_day = j;
         break;
       }
     }
+    // Finds last day of work
     for (int j = nscenes-1; j >= 0; j--) {
       if (t[i][sol.sol[j]]) {
         last_day = j;
         break;
       }
     }
+    // Sums actor cost to total
     cost += (last_day - first_day + 1 - wdays[i]) * costs[i];
   }
   return cost;
 }
+
+////////////////////////////////////////////////////////////////////////////////
 
 void greedy_solution(solution& sol)
 {
@@ -70,6 +76,8 @@ void greedy_solution(solution& sol)
   sol.lower_bound = get_cost(sol);
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
 void get_neighbour(solution& sol, solution& new_sol)
 {
   // Copies solution
@@ -90,15 +98,22 @@ void get_neighbour(solution& sol, solution& new_sol)
   new_sol.lower_bound = get_cost(new_sol);
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
 float get_probability(float cost_diff, float temperature)
 {
   return std::exp(-cost_diff / (K * temperature));
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
 float update_temperature(float fraction)
 {
+  fraction = std::min(fraction, 1.0f);
   return (1 - fraction) * T_ZERO;
 }
+
+////////////////////////////////////////////////////////////////////////////////
 
 void simmulated_anneling(float time_max)
 {
@@ -106,6 +121,7 @@ void simmulated_anneling(float time_max)
   best_sol = solution(nscenes);
   greedy_solution(best_sol);
   solution cur_sol(best_sol);
+  std::cout << "Iteration 0 -> Best: " << best_sol.lower_bound << std::endl;
 
   // Initialization
   auto time_start = std::chrono::high_resolution_clock::now();
@@ -114,10 +130,12 @@ void simmulated_anneling(float time_max)
   float temperature = T_ZERO;
 
   // Run until temperature reaches 0
-  while (temperature >= 0) {
+  int iteration = 0;
+  while (temperature > 0) {
     // Generate new solution for a maximum of N steps without improvement
     for (int i = 0; i < N_STEPS; i++) {
       // Gets new solution
+      iteration++;
       solution new_sol;
       get_neighbour(cur_sol, new_sol);
 
@@ -132,6 +150,12 @@ void simmulated_anneling(float time_max)
         // Accepts best solution
         if (new_sol.lower_bound < best_sol.lower_bound) {
           best_sol = new_sol;
+
+          // Prints current results
+          std::cout << "Iteration " << iteration;
+          std::cout << " -> Best: " << best_sol.lower_bound;
+          std::cout << " / Temperature: " << temperature;
+          std::cout << " / Time: " << time_delta.count() / 1000 << std::endl;
         }
       }
       // Accepts worse solution with some probability
@@ -155,6 +179,12 @@ void simmulated_anneling(float time_max)
     // Updates temperature
     temperature = update_temperature(time_delta.count() / time_max);
   }
+
+  // Prints final results
+  std::cout << "Iteration " << iteration;
+  std::cout << " -> Best: " << best_sol.lower_bound;
+  std::cout << " / Temperature: " << temperature;
+  std::cout << " / Time: " << time_delta.count() / 1000 << std::endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -365,6 +395,7 @@ void genetic_algorithm(float time_max)
   int generation = 0;
   while (time_delta.count() < time_max) {
     // Evolves population
+    generation++;
     evolve_population(population, total_fitness);
 
     // Gets fittest solution and total fitness
@@ -375,7 +406,6 @@ void genetic_algorithm(float time_max)
     time_delta = time_now - time_start;
 
     // Prints generation results
-    generation++;
     if (new_fittest.lower_bound < fittest.lower_bound || time_delta.count() >= time_max) {
       fittest = new_fittest;
       std::cout << "Generation " << generation;
