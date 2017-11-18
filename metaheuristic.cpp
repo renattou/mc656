@@ -226,7 +226,7 @@ void crossover(solution& individual_1, solution& individual_2)
   for (idx1 = 0; idx1 < nscenes - 1; idx1++) {
     // Finds next gene not already present on new individual
     while (std::find(it_min, it_max, individual_2.sol[idx2]) == it_max) {
-      it_max++;
+      idx2++;
     }
     // Replaces genes outside crossover range
     if (idx1 < min && idx1 > max) {
@@ -242,7 +242,7 @@ void crossover(solution& individual_1, solution& individual_2)
   for (idx2 = 0; idx2 < nscenes - 1; idx2++) {
     // Finds next gene not already present on new individual
     while (std::find(it_min, it_max, temp_individual_1.sol[idx1]) == it_max) {
-      it_max++;
+      idx1++;
     }
     // Replaces genes outside crossover range
     if (idx2 < min && idx2 > max) {
@@ -354,7 +354,7 @@ void genetic_algorithm(float time_max)
   // Updates best solution
   int total_fitness = 0;
   solution fittest = get_fittest(population, total_fitness);
-  //std::cout << "Generation 0 -> Fittest: " << fittest.lower_bound << std::endl;
+  std::cout << "Generation 0 -> Fittest: " << fittest.lower_bound << std::endl;
 
   // Timer initialization
   auto time_start = std::chrono::high_resolution_clock::now();
@@ -368,16 +368,20 @@ void genetic_algorithm(float time_max)
     evolve_population(population, total_fitness);
 
     // Gets fittest solution and total fitness
-    fittest = get_fittest(population, total_fitness);
+    solution new_fittest = get_fittest(population, total_fitness);
 
     // Updates elapsed time
     time_now = std::chrono::high_resolution_clock::now();
     time_delta = time_now - time_start;
 
     // Prints generation results
-    //std::cout << "Generation " << ++generation;
-    //std::cout << " -> Fittest: " << fittest.lower_bound;
-    //std::cout << " / Time: " << time_delta.count() / 1000 << std::endl;
+    generation++;
+    if (new_fittest.lower_bound < fittest.lower_bound || time_delta.count() >= time_max) {
+      fittest = new_fittest;
+      std::cout << "Generation " << generation;
+      std::cout << " -> Fittest: " << fittest.lower_bound;
+      std::cout << " / Time: " << time_delta.count() / 1000 << std::endl;
+    }
   }
 }
 
