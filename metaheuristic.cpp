@@ -261,7 +261,7 @@ void mutate(solution& individual)
 {
   // Tries mutating every scene by swapping
   for (int idx1 = 0; idx1 < nscenes - 1; idx1++) {
-    float mutation_chance = (double) rand() / (RAND_MAX);
+    float mutation_chance = (double)rand() / (RAND_MAX);
     if (mutation_chance < MUTATION_RATE) {
       // Gets random scene after this one
       int idx2 = idx1 + 1 + rand() % (nscenes - idx1 - 1);
@@ -280,17 +280,18 @@ void mutate(solution& individual)
 int roulette(std::vector<solution>& population, int total_fitness)
 {
   // Randomizes roulette range
-  int random_range = 1 + rand() % total_fitness;
+  float random_probability = (double)rand() / (RAND_MAX);
   // Searches for individual on this range
-  int current_range = 0;
-  for (int i = 0; population.size(); i++) {
-    current_range += population[i].lower_bound;
-    if (current_range >= random_range) {
+  float current_probability = 0;
+  for (int i = 0; i < N_MEMBERS; i++) {
+    float fitness_ratio = population[i].lower_bound / (float)total_fitness;
+    current_probability += (1 - fitness_ratio) / (N_MEMBERS - 1);
+    if (current_probability >= random_probability) {
       return i;
     }
   }
   // Should not reach this point
-  return rand() % population.size();
+  return rand() % N_MEMBERS;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
