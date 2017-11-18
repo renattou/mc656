@@ -289,12 +289,29 @@ void crossover(solution& individual_1, solution& individual_2)
 
 void mutate(solution& individual)
 {
+  // Chooses mutation type
+  int mutation_type = rand() % 3;
   // Tries mutating every scene by swapping
+  int idx2 = 0;
   for (int idx1 = 0; idx1 < nscenes - 1; idx1++) {
     float mutation_chance = (double)rand() / (RAND_MAX);
     if (mutation_chance < MUTATION_RATE) {
-      // Gets random scene after this one
-      int idx2 = idx1 + 1 + rand() % (nscenes - idx1 - 1);
+      if (mutation_type <= 0) {
+        // Stops at half size
+        if (idx1 > nscenes / 2) {
+          break;
+        }
+        // Gets opposite gene
+        idx2 = nscenes - idx1 - 1;
+      }
+      else if (mutation_type <= 1) {
+        // Gets neighbour gene
+        idx2 = idx1 + 1;
+      }
+      else {
+        // Gets random gene after this one
+        idx2 = idx1 + 1 + rand() % (nscenes - idx1 - 1);
+      }
       // Swaps scenes
       int scene1 = individual.sol[idx1];
       individual.sol[idx1] = individual.sol[idx2];
