@@ -16,9 +16,9 @@
 const float T_ZERO = 100; // Initial temperature
 const float K = 1; // Constant for probability
 const int N_STEPS = 10; // Number maximum of steps without improving solution
-const int N_MEMBERS = 20; // Size of population
+const int N_MEMBERS = 21; // Size of population
 const float MUTATION_RATE = 0.1f; // Probability of mutating a gene
-const float CROSSOVER_RATE = 0.25f; // Max percentage of genes that can be crossed-over
+const float CROSSOVER_RATE = 0.2f; // Max percentage of genes that can be crossed-over
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -301,8 +301,12 @@ void evolve_population(std::vector<solution>& population, int total_fitness)
   std::vector<solution> new_population;
   new_population.reserve(N_MEMBERS);
 
+  // Saves fittest individual
+  solution fittest = get_fittest(population, total_fitness);
+  new_population.push_back(fittest);
+
   // Generates new individuals
-  for (int i = 0; i < N_MEMBERS; i = i + 2) {
+  for (int i = 1; i < N_MEMBERS; i = i + 2) {
     // Gets parents and creates children
     int parent_idx1 = roulette(population, total_fitness);
     int parent_idx2 = roulette(population, total_fitness);
