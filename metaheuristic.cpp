@@ -17,8 +17,9 @@ const float T_ZERO = 100; // Initial temperature
 const float K = 1; // Constant for probability
 const int N_STEPS = 10; // Number maximum of steps without improving solution
 const int N_MEMBERS = 25; // Size of population (use odd numbers to crossover all but the fittest)
-const float MUTATION_RATE = 0.05f; // Probability of mutating a gene
-const float CROSSOVER_RATE = 0.5f; // Min percentage of genes to be preserved on crossover
+const float MUTATION_RATE = 0.01f; // Probability of mutating a gene
+const float CROSSOVER_MIN_RATE = 0.5f; // Min percentage of genes to be crossed-over
+const float CROSSOVER_MAX_RATE = 0.8f; // Max percentage of genes to be crossed-over
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -239,14 +240,42 @@ solution get_fittest(std::vector<solution>& population, int& total_fitness)
 
 void crossover(solution& individual_1, solution& individual_2)
 {
+  // Chooses crossover type
+  int crossover_type = rand() % 3;
+
   // Copies individual 1
   solution temp_individual_1 = individual_1;
 
   // Crossover range
-  int min_range = (int)std::ceil(CROSSOVER_RATE * nscenes);
-  int min = rand() % (nscenes - min_range);
-  int max = min + rand() % (nscenes - min);
-  int idx1, idx2;
+  int min_range = (int)std::ceil(CROSSOVER_MIN_RATE * nscenes);
+  int max_range = (int)std::ceil(CROSSOVER_MAX_RATE * nscenes);
+  int range = min_range + rand() % (max_range - min_range + 1);
+  if (range == 0) {
+    return;
+  }
+  else if (range == nscenes) {
+    individual_1 = individual_2;
+    individual_2 = temp_individual_1;
+    return;
+  }
+
+  // Crossover indexes
+  int min, max, idx1, idx2;
+  if (crossover_type <= 0) {
+    // Does crossover at the beginning
+    min = 0;
+    max = min + (range - 1);
+  }
+  else if (crossover_type <= 1) {
+    // Does crossover at the end
+    max = nscenes - 1;
+    min = max - (range - 1);
+  }
+  else {
+    // Does crossover at the middle
+    min = (range == nscenes) ? 0 : rand() % (nscenes - range);
+    max = min + (range - 1);
+  }
 
   // Keep individual 1 genes on crossover range
   // and copies remaining genes from individual 2 on order
@@ -291,6 +320,7 @@ void mutate(solution& individual)
 {
   // Chooses mutation type
   int mutation_type = rand() % 3;
+
   // Tries mutating every scene by swapping
   int idx2 = 0;
   for (int idx1 = 0; idx1 < nscenes - 1; idx1++) {
@@ -318,6 +348,7 @@ void mutate(solution& individual)
       individual.sol[idx2] = scene1;
     }
   }
+
   // Updates fitness
   individual.lower_bound = get_cost(individual);
 }
