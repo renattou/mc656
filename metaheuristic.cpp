@@ -17,7 +17,7 @@ const float T_ZERO = 100; // Initial temperature
 const float K = 1; // Constant for probability
 const int N_STEPS = 10; // Number maximum of steps without improving solution
 const int N_MEMBERS = 20; // Size of population
-const float MUTATION_RATE = 0.2f; // Probability of mutating a gene
+const float MUTATION_RATE = 0.1f; // Probability of mutating a gene
 const float CROSSOVER_RATE = 0.25f; // Max percentage of genes that can be crossed-over
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -28,13 +28,13 @@ int get_cost(solution& sol)
   for (int i = 0; i < nactors; i++) {
     int first_day = 0, last_day = nscenes - 1;
     for (int j = 0; j < nscenes; j++) {
-      if (t[i][sol.sol[j]] == -1) {
+      if (t[i][sol.sol[j]]) {
         first_day = j;
         break;
       }
     }
     for (int j = nscenes-1; j >= 0; j--) {
-      if (t[i][sol.sol[j]] == -1) {
+      if (t[i][sol.sol[j]]) {
         last_day = j;
         break;
       }
@@ -192,14 +192,14 @@ solution get_fittest(std::vector<solution>& population, int& total_fitness)
   total_fitness = 0;
   // Search fittest individual of population
   for (int i = 1; i < population.size(); i++) {
-    if (population[i].lower_bound >= population[fittest_idx].lower_bound) {
+    if (population[i].lower_bound <= population[fittest_idx].lower_bound) {
       fittest_idx = i;
     }
     total_fitness += population[i].lower_bound;
   }
   // Checks if fittest individual is also best solution
   solution fittest = population[fittest_idx];
-  if (fittest.lower_bound > best_sol.lower_bound) {
+  if (fittest.lower_bound < best_sol.lower_bound) {
     best_sol = fittest;
   }
   return fittest;
@@ -215,7 +215,7 @@ void crossover(solution& individual_1, solution& individual_2)
   // Crossover range
   int min = rand() % nscenes;
   int max_range = (int)std::ceil(CROSSOVER_RATE * nscenes);
-  int max = min + (rand() % (nscenes - min)) % max_range;
+  int max = min + (rand() % (nscenes - min)) % (max_range + 1);
   int idx1, idx2;
 
   // Keep individual 1 genes on crossover range
@@ -257,7 +257,7 @@ void crossover(solution& individual_1, solution& individual_2)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void mutate(solution individual)
+void mutate(solution& individual)
 {
   // Tries mutating every scene by swapping
   for (int idx1 = 0; idx1 < nscenes - 1; idx1++) {
@@ -306,7 +306,7 @@ void evolve_population(std::vector<solution>& population, int total_fitness)
     // Gets parents and creates children
     int parent_idx1 = roulette(population, total_fitness);
     int parent_idx2 = roulette(population, total_fitness);
-    std::cout << parent_idx1 << " " << parent_idx2 << " " << total_fitness << std::endl;
+
     solution child_1 = population[parent_idx1];
     solution child_2 = population[parent_idx2];
 
@@ -349,7 +349,7 @@ void genetic_algorithm(float time_max)
   // Updates best solution
   int total_fitness = 0;
   solution fittest = get_fittest(population, total_fitness);
-  std::cout << "Generation 0 -> Fittest: " << fittest.lower_bound << std::endl;
+  //std::cout << "Generation 0 -> Fittest: " << fittest.lower_bound << std::endl;
 
   // Timer initialization
   auto time_start = std::chrono::high_resolution_clock::now();
@@ -370,9 +370,9 @@ void genetic_algorithm(float time_max)
     time_delta = time_now - time_start;
 
     // Prints generation results
-    std::cout << "Generation " << ++generation;
-    std::cout << " -> Fittest: " << fittest.lower_bound;
-    std::cout << " / Time: " << time_delta.count() / 1000 << std::endl;
+    //std::cout << "Generation " << ++generation;
+    //std::cout << " -> Fittest: " << fittest.lower_bound;
+    //std::cout << " / Time: " << time_delta.count() / 1000 << std::endl;
   }
 }
 

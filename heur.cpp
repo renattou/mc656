@@ -15,8 +15,8 @@ int main(int argc, char **argv)
   // Reads from input file
   read_input(argv[1]);
 
-  // Runs simmulated anneling until timeout
-  simmulated_anneling(TIMEOUT);
+  // Runs genetic algorithm until timeout
+  genetic_algorithm(TIMEOUT);
 
   // Prints and exit
   print_and_exit();
