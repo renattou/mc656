@@ -16,9 +16,9 @@
 const float T_ZERO = 100; // Initial temperature
 const float K = 1; // Constant for probability
 const int N_STEPS = 10; // Number maximum of steps without improving solution
-const int N_MEMBERS = 21; // Size of population
-const float MUTATION_RATE = 0.1f; // Probability of mutating a gene
-const float CROSSOVER_RATE = 0.2f; // Max percentage of genes that can be crossed-over
+const int N_MEMBERS = 25; // Size of population (use odd numbers to crossover all but the fittest)
+const float MUTATION_RATE = 0.05f; // Probability of mutating a gene
+const float CROSSOVER_RATE = 0.5f; // Min percentage of genes to be preserved on crossover
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -213,9 +213,9 @@ void crossover(solution& individual_1, solution& individual_2)
   solution temp_individual_1 = individual_1;
 
   // Crossover range
-  int min = rand() % nscenes;
-  int max_range = (int)std::ceil(CROSSOVER_RATE * nscenes);
-  int max = min + (rand() % (nscenes - min)) % (max_range + 1);
+  int min_range = (int)std::ceil(CROSSOVER_RATE * nscenes);
+  int min = rand() % (nscenes - min_range);
+  int max = min + rand() % (nscenes - min);
   int idx1, idx2;
 
   // Keep individual 1 genes on crossover range
