@@ -10,3 +10,11 @@ modelo
 pli-solver
 bnb
 heur
+
+# LaTeX
+relatorio/*.log
+relatorio/*.aux
+relatorio/*.pdf
+relatorio/*.fdb_latexmk
+relatorio/*.fls
+relatorio/*.gz

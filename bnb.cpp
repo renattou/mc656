@@ -32,7 +32,7 @@ int main(int argc, char **argv)
   read_input(argv[1]);
 
   // Lets do our heuristics first to find a good bound for the algorithm
-  genetic_algorithm(3000);
+  genetic_algorithm(10000);
 
   // Creates tree root with empty solution
   sol_tree.push_back(solution(nscenes));
@@ -47,7 +47,7 @@ int main(int argc, char **argv)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-
+// Computes the sum of k1 and k2 bounds as described in the paper
 int k1k2(solution& sol, std::vector<int>& bl, std::vector<int>& br)
 {
   int lmost, rmost, rlmost, lrmost, partial;
@@ -58,6 +58,8 @@ int k1k2(solution& sol, std::vector<int>& bl, std::vector<int>& br)
     lmost = rlmost = lrmost = rmost = -1;
     partial = 0;
 
+    // computes index of left most 1 in the scenes order and set it to lmost
+    // Also computes the right most 1 in the left set and set it to lrmost
     for(int j=0; j < sol.lactive; j++) {
       if(t[i][sol.sol[j]] == true) {
         if(lmost == -1) lmost = j;
@@ -66,6 +68,8 @@ int k1k2(solution& sol, std::vector<int>& bl, std::vector<int>& br)
       }
     }
 
+    // computes index of right most 1 in the scenes order and set it to rmost
+    // Also computes the left most 1 in the right set and set it to rlmost
     for(int j=sol.sol.size()-1; j >= sol.ractive; j--) {
       if(t[i][sol.sol[j]] == true) {
         if(rmost == -1) rmost = j;
@@ -74,26 +78,31 @@ int k1k2(solution& sol, std::vector<int>& bl, std::vector<int>& br)
       }
     }
 
+    // If the waiting time is totally defined
     if(lmost != -1 && rmost != -1) {
       partial = (rmost - lmost + 1 - wdays[i]);
     }
+    // If only the left set is defined
     else if(lmost != -1) {
       for(int j=lmost+1; j < lrmost; j++) partial += (1 - (int)t[i][sol.sol[j]]);
 
       if(partial > 0) bl.push_back(i);
     }
+    // If only the right set is defined
     else if(rmost != -1) {
       for(int j=rmost-1; j > rlmost; j--) partial += (1 - (int)t[i][sol.sol[j]]);
 
       if(partial > 0) br.push_back(i);
     }
 
+    // Updates cost for each actor
     cost += partial * costs[i];
   }
 
   return cost;
 }
 
+// Computes Q set as defined in the paper
 void compute_Q(solution& sol, std::vector<int>& bl, std::vector<std::pair<int, int>>& Q)
 {
   // List of tuples for (scene id, actors in the scene, scene cost)
@@ -144,6 +153,7 @@ void compute_Q(solution& sol, std::vector<int>& bl, std::vector<std::pair<int, i
   std::sort(Q.begin(), Q.end(), [](const q_t& i, const q_t& j) { return i.second > j.second; });
 }
 
+// Computes k3 as defined in the paper
 int k3(solution& sol, std::vector<int>& bl)
 {
   std::vector<std::pair<int, int>> Q;
@@ -152,6 +162,7 @@ int k3(solution& sol, std::vector<int>& bl)
   // Computes Q according to the description of the problem in decreasing weight
   compute_Q(sol, bl, Q);
 
+  // Computes the cost
   for(int i=0; i < (int)Q.size(); i++)
   {
     cost += i * Q[i].second;
@@ -160,6 +171,7 @@ int k3(solution& sol, std::vector<int>& bl)
   return cost;
 }
 
+// Computes k4 as defined in the paper
 int k4(solution& sol, std::vector<int>& br)
 {
   std::vector<std::pair<int, int>> Q;
@@ -168,6 +180,7 @@ int k4(solution& sol, std::vector<int>& br)
   // Computes Q according to the description of the problem in decreasing weight
   compute_Q(sol, br, Q);
 
+  // Computes the cost
   for(int i=0; i < (int)Q.size(); i++)
   {
     cost += i * Q[i].second;
@@ -219,9 +232,9 @@ void explore()
       int st_size = sol_tree.size(), idx = -1, min = -1;
 
       if(node.lactive == (int)node.sol.size() - node.ractive) {
-        idx = ++node.lactive-1;
+        idx = ++node.lactive-1; // insert on the left
       } else {
-        idx = --node.ractive;
+        idx = --node.ractive; // insert on the right
         min = (node.ractive == node.sol.size()-1) ? node.sol[node.lactive-1] : -1;
       }
 
@@ -230,16 +243,15 @@ void explore()
       for(int it=0; it < node.comp.size(); it++) {
         int scene = node.comp[it];
 
-        if(min < scene) { // breaks simetry
+        if(min < scene) { // This if breaks simetry of solutions
+          // Creates the new partial solution candidate
           solution new_node(node);
-
           new_node.comp.erase(new_node.comp.begin()+it, new_node.comp.begin()+it+1);
           new_node.sol[idx] = scene;
           new_node.lower_bound = lower_bound(new_node);
 
+          // Completes the partial solution candidate by using a greedy algorithm
           solution greedy(new_node);
-
-          // Asks for a greedy solution
           greedy_solution(greedy);
 
           // mature node condition
@@ -266,9 +278,8 @@ void explore()
           sol_tree.erase(sol_tree.begin()+i, sol_tree.begin()+i+1);
       }
 
+      // Makes the heap again
       std::make_heap(sol_tree.begin(), sol_tree.end());
-
-      // std::cerr << "After removal " << sol_tree.size() << std::endl;
     }
   }
 }
