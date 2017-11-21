@@ -4,10 +4,10 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-solution::solution(short int elems) :
+solution::solution(short elems) :
   sol(elems, -1), comp(elems, 0), lactive(0), ractive(elems), lower_bound(0)
 {
-  for(short int i=0; i < elems; i++) this->comp[i] = i;
+  for(short i=0; i < elems; i++) this->comp[i] = i;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -40,8 +40,8 @@ solution best_sol; // best solution so far
 
 std::vector<std::vector<bool>> t; // t matrix
 std::vector<int> costs, scene_costs; // cost array for each actor
-std::vector<short int> wdays;
-short int nscenes, nactors; // number of scenes and actors
+std::vector<short> wdays;
+short nscenes, nactors; // number of scenes and actors
 long long unsigned nexplored = 0; // number of explored nodes
 
 std::vector<solution> sol_tree; // solution tree (min-heap)
@@ -61,9 +61,9 @@ void read_input(char *filename)
   // Reads scenesXactors matrix
   t.resize(nactors);
   wdays.assign(nactors, 0);
-  for(short int i=0; i < nactors; i++) {
+  for(short i=0; i < nactors; i++) {
     t[i].resize(nscenes);
-    for(short int j=0; j < nscenes; j++) {
+    for(short j=0; j < nscenes; j++) {
       bool isin;
 
       input >> isin;
@@ -75,8 +75,8 @@ void read_input(char *filename)
 
   // Reads actors costs
   costs.resize(nactors);
-  for(short int i=0; i < nactors; i++) {
-    short int c;
+  for(short i=0; i < nactors; i++) {
+    short c;
 
     input >> c;
     costs[i] = c;
@@ -84,9 +84,9 @@ void read_input(char *filename)
 
   // Calculate total cost for each day
   scene_costs.resize(nscenes);
-  for(short int j=0; j < nscenes; j++) {
+  for(short j=0; j < nscenes; j++) {
     scene_costs[j] = 0;
-    for(short int i=0; i < nactors; i++) {
+    for(short i=0; i < nactors; i++) {
       if (t[i][j]) {
         scene_costs[j] += costs[i];
       }

@@ -46,19 +46,19 @@ int main(int argc, char **argv)
 
 ////////////////////////////////////////////////////////////////////////////////
 // Computes the sum of k1 and k2 bounds as described in the paper
-int k1k2(solution& sol, std::vector<short int>& bl, std::vector<short int>& br)
+int k1k2(solution& sol, std::vector<short>& bl, std::vector<short>& br)
 {
-  short int lmost, rmost, rlmost, lrmost, partial;
+  short lmost, rmost, rlmost, lrmost, partial;
   int cost = 0;
 
-  for(short int i=0; i < nactors; i++)
+  for(short i=0; i < nactors; i++)
   {
     lmost = rlmost = lrmost = rmost = -1;
     partial = 0;
 
     // computes index of left most 1 in the scenes order and set it to lmost
     // Also computes the right most 1 in the left set and set it to lrmost
-    for(short int j=0; j < sol.lactive; j++) {
+    for(short j=0; j < sol.lactive; j++) {
       if(t[i][sol.sol[j]] == true) {
         if(lmost == -1) lmost = j;
 
@@ -68,7 +68,7 @@ int k1k2(solution& sol, std::vector<short int>& bl, std::vector<short int>& br)
 
     // computes index of right most 1 in the scenes order and set it to rmost
     // Also computes the left most 1 in the right set and set it to rlmost
-    for(short int j=sol.sol.size()-1; j >= sol.ractive; j--) {
+    for(short j=sol.sol.size()-1; j >= sol.ractive; j--) {
       if(t[i][sol.sol[j]] == true) {
         if(rmost == -1) rmost = j;
 
@@ -82,13 +82,13 @@ int k1k2(solution& sol, std::vector<short int>& bl, std::vector<short int>& br)
     }
     // If only the left set is defined
     else if(lmost != -1) {
-      for(short int j=lmost+1; j < lrmost; j++) partial += (1 - (int)t[i][sol.sol[j]]);
+      for(short j=lmost+1; j < lrmost; j++) partial += (1 - (int)t[i][sol.sol[j]]);
 
       if(partial > 0) bl.push_back(i);
     }
     // If only the right set is defined
     else if(rmost != -1) {
-      for(short int j=rmost-1; j > rlmost; j--) partial += (1 - (int)t[i][sol.sol[j]]);
+      for(short j=rmost-1; j > rlmost; j--) partial += (1 - (int)t[i][sol.sol[j]]);
 
       if(partial > 0) br.push_back(i);
     }
@@ -101,10 +101,10 @@ int k1k2(solution& sol, std::vector<short int>& bl, std::vector<short int>& br)
 }
 
 // Computes Q set as defined in the paper
-void compute_Q(solution& sol, std::vector<short int>& bl, std::vector<std::pair<short int, int>>& Q)
+void compute_Q(solution& sol, std::vector<short>& bl, std::vector<std::pair<short, int>>& Q)
 {
   // List of tuples for (scene id, actors in the scene, scene cost)
-  using elem_t = std::tuple<short int, std::vector<short int>, int>;
+  using elem_t = std::tuple<short, std::vector<short>, int>;
   std::vector<elem_t> candidates;
 
   // Reserves right size for candidates
@@ -112,18 +112,30 @@ void compute_Q(solution& sol, std::vector<short int>& bl, std::vector<std::pair<
 
   // Computes number of actors in bl per scene
   for(auto scene: sol.comp) {
-    candidates.push_back(std::make_tuple(scene, std::vector<short int>(), 0));
+    std::vector<short> actors;
+    int cost = 0;
 
-    for(short int actor: bl) {
+    for(short actor: bl) {
       if(t[actor][scene]) {
-        std::get<1>(candidates.back()).push_back(actor);
-        std::get<2>(candidates.back()) += costs[actor];
+        actors.push_back(actor);
+        cost += costs[actor];
+
+        // std::get<1>(candidates.back()).push_back(actor);
+        // std::get<2>(candidates.back()) += costs[actor];
       }
     }
+
+    if(cost > 0) // only add candidates with positive costs
+      candidates.push_back(std::make_tuple(scene, actors, cost));
   }
 
-  // Sorts scenes in increasing order of number of actors per scene
-  std::sort(candidates.begin(), candidates.end(), [](const elem_t& i, const elem_t& j) { return std::get<1>(i).size() < std::get<1>(j).size(); });
+  // Sorts scenes in increasing order of number of actors per scene. Use costs as tie breaker
+  std::sort(candidates.begin(), candidates.end(), [](const elem_t& i, const elem_t& j)
+  {
+    int si = std::get<1>(i).size(), sj = std::get<1>(j).size();
+    if( si == sj ) return std::get<2>(i) < std::get<2>(j);
+    else return  si < sj;
+  });
 
   // Now lets set the Q set.
 
@@ -132,57 +144,52 @@ void compute_Q(solution& sol, std::vector<short int>& bl, std::vector<std::pair<
   // iterates over the scenes candidates
   for(auto& candidate: candidates)
   {
-    short int scene = std::get<0>(candidate); // scene id
+    short scene = std::get<0>(candidate); // scene id
     bool add_scene = true; // always try to add scene
-    std::vector<short int>& actors = std::get<1>(candidate); // actors in that scene
+    std::vector<short>& actors = std::get<1>(candidate); // actors in that scene
     int cost = std::get<2>(candidate);
 
     // Checks if an actor was used in this scene before
-    for(short int actor: actors) { if(used_actors[actor]) { add_scene = false; break; } }
+    for(short actor: actors) { if(used_actors[actor]) { add_scene = false; break; } }
 
     // If none of the actors of this scene were used yet, try adding the scene
     if(add_scene) {
+      // std::cout << "(" << scene << "," << cost << "," << actors << ")" << std::endl;
       Q.push_back(std::make_pair(scene, cost)); // adds the scene
-      for(short int actor: actors) used_actors[actor] = true; // adds to used actors
+      for(short actor: actors) used_actors[actor] = true; // adds to used actors
     }
   }
 
-  using q_t = std::pair<short int, int>;
+  using q_t = std::pair<short, int>;
   std::sort(Q.begin(), Q.end(), [](const q_t& i, const q_t& j) { return i.second > j.second; });
 }
 
 // Computes k3 as defined in the paper
-int k3(solution& sol, std::vector<short int>& bl)
+int k3(solution& sol, std::vector<short>& bl)
 {
-  std::vector<std::pair<short int, int>> Q;
+  std::vector<std::pair<short, int>> Q;
   int cost = 0;
 
   // Computes Q according to the description of the problem in decreasing weight
   compute_Q(sol, bl, Q);
 
   // Computes the cost
-  for(short int i=0; i < (short int)Q.size(); i++)
-  {
-    cost += i * Q[i].second;
-  }
+  for(short i=0; i < (short)Q.size(); i++) cost += i * Q[i].second;
 
   return cost;
 }
 
 // Computes k4 as defined in the paper
-int k4(solution& sol, std::vector<short int>& br)
+int k4(solution& sol, std::vector<short>& br)
 {
-  std::vector<std::pair<short int, int>> Q;
+  std::vector<std::pair<short, int>> Q;
   int cost = 0;
 
   // Computes Q according to the description of the problem in decreasing weight
   compute_Q(sol, br, Q);
 
   // Computes the cost
-  for(short int i=0; i < (short int)Q.size(); i++)
-  {
-    cost += i * Q[i].second;
-  }
+  for(short i=0; i < (short)Q.size(); i++) cost += i * Q[i].second;
 
   return cost;
 }
@@ -192,7 +199,7 @@ int k4(solution& sol, std::vector<short int>& br)
 // computing the acummulated sum of k1,k2,k3 and k4.
 int lower_bound(solution& sol)
 {
-  std::vector<short int> bl, br;
+  std::vector<short> bl, br;
 
   int bound = k1k2(sol, bl, br);
   bound += k3(sol, bl);
@@ -205,45 +212,43 @@ int lower_bound(solution& sol)
 // Explores the solution tree by using branch and bound - best fit
 void explore()
 {
-  int mem = 1; // used at memory management
+  // int mem = 1; // used at memory management
 
   while(sol_tree.size() > 0 && sol_tree.front().lower_bound < best_sol.lower_bound)
   {
-    // Pops head from the priority queue
-    solution node = sol_tree.front();
-    std::pop_heap(sol_tree.begin(), sol_tree.end());
-    sol_tree.pop_back();
-
     // Number of explored nodes
     nexplored++;
 
     // If we've found a possible solution
-    if(node.comp.size() == 0)
+    if(sol_tree.front().comp.size() == 0)
     {
       // If the solution is actually better
-      if(node.lower_bound < best_sol.lower_bound) {
+      if(sol_tree.front().lower_bound < best_sol.lower_bound) {
         // the solution is actually better
-        update_solution(node);
+        update_solution(sol_tree.front());
       }
+
+      std::pop_heap(sol_tree.begin(), sol_tree.end());
+      sol_tree.pop_back();
     } else
     {
       int st_size = sol_tree.size(), idx = -1, min = -1;
 
-      if(node.lactive == (short int)node.sol.size() - node.ractive) {
-        idx = ++node.lactive-1; // insert on the left
+      if(sol_tree.front().lactive == (short)sol_tree.front().sol.size() - sol_tree.front().ractive) {
+        idx = ++sol_tree.front().lactive-1; // insert on the left
       } else {
-        idx = --node.ractive; // insert on the right
-        min = (node.ractive == (short)node.sol.size()-1) ? node.sol[node.lactive-1] : -1;
+        idx = --sol_tree.front().ractive; // insert on the right
+        min = (sol_tree.front().ractive == (short)sol_tree.front().sol.size()-1) ? sol_tree.front().sol[sol_tree.front().lactive-1] : -1;
       }
 
       // for each possible scene, creates a new solution with it and inserts it
       // into the solution tree if its lower bound allows
-      for(short it=0; it < (short)node.comp.size(); it++) {
-        short int scene = node.comp[it];
+      for(short it=0; it < (short)sol_tree.front().comp.size(); it++) {
+        short scene = sol_tree.front().comp[it];
 
         if(min < scene) { // This if breaks simetry of solutions
           // Creates the new partial solution candidate
-          solution new_node(node);
+          solution new_node(sol_tree.front());
           new_node.comp.erase(new_node.comp.begin()+it, new_node.comp.begin()+it+1);
           new_node.sol[idx] = scene;
           new_node.lower_bound = lower_bound(new_node);
@@ -259,11 +264,15 @@ void explore()
         }
       }
 
+      // pop from heap
+      std::pop_heap(sol_tree.begin(), sol_tree.end());
+      sol_tree.pop_back();
+
       // updates heap with freshly added nodes
-      for(short int it = std::max(st_size, 1); it <= (short int)sol_tree.size(); it++) {
-        std::cerr << "Pushing heap... " << sol_tree.size();
+      for(int it = std::max(st_size-1, 1); it < (int)sol_tree.size(); it++) {
+        // std::cerr << "Pushing heap... " << sol_tree.size();
         std::push_heap(sol_tree.begin(), sol_tree.begin()+it);
-        std::cerr << "[Done]" << std::endl;
+        // std::cerr << "[Done]" << std::endl;
       }
     }
 
