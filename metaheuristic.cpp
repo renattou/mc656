@@ -222,7 +222,7 @@ solution get_fittest(std::vector<solution>& population, int& total_fitness)
   int fittest_idx = 0;
   total_fitness = 0;
   // Search fittest individual of population
-  for (int i = 1; i < population.size(); i++) {
+  for (int i = 1; i < (int)population.size(); i++) {
     if (population[i].lower_bound <= population[fittest_idx].lower_bound) {
       fittest_idx = i;
     }

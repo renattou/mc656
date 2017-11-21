@@ -4,10 +4,10 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-solution::solution(int elems) :
+solution::solution(short int elems) :
   sol(elems, -1), comp(elems, 0), lactive(0), ractive(elems), lower_bound(0)
 {
-  for(int i=0; i < elems; i++) this->comp[i] = i;
+  for(short int i=0; i < elems; i++) this->comp[i] = i;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -39,9 +39,9 @@ std::mutex sol_lock;  // Solution mutex
 solution best_sol; // best solution so far
 
 std::vector<std::vector<bool>> t; // t matrix
-std::vector<int> costs, wdays; // cost array for each actor
-std::vector<int> scene_costs; // total cost array for each day
-int nscenes, nactors; // number of scenes and actors
+std::vector<int> costs, scene_costs; // cost array for each actor
+std::vector<short int> wdays;
+short int nscenes, nactors; // number of scenes and actors
 long long unsigned nexplored = 0; // number of explored nodes
 
 std::vector<solution> sol_tree; // solution tree (min-heap)
@@ -61,9 +61,9 @@ void read_input(char *filename)
   // Reads scenesXactors matrix
   t.resize(nactors);
   wdays.assign(nactors, 0);
-  for(int i=0; i < nactors; i++) {
+  for(short int i=0; i < nactors; i++) {
     t[i].resize(nscenes);
-    for(int j=0; j < nscenes; j++) {
+    for(short int j=0; j < nscenes; j++) {
       bool isin;
 
       input >> isin;
@@ -75,8 +75,8 @@ void read_input(char *filename)
 
   // Reads actors costs
   costs.resize(nactors);
-  for(int i=0; i < nactors; i++) {
-    int c;
+  for(short int i=0; i < nactors; i++) {
+    short int c;
 
     input >> c;
     costs[i] = c;
@@ -84,9 +84,9 @@ void read_input(char *filename)
 
   // Calculate total cost for each day
   scene_costs.resize(nscenes);
-  for(int j=0; j < nscenes; j++) {
+  for(short int j=0; j < nscenes; j++) {
     scene_costs[j] = 0;
-    for(int i=0; i < nactors; i++) {
+    for(short int i=0; i < nactors; i++) {
       if (t[i][j]) {
         scene_costs[j] += costs[i];
       }

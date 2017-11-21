@@ -12,13 +12,13 @@
 class solution
 {
 public:
-  std::vector<int> sol; // solution array
-  std::vector<int> comp; // scenes to be added to this solution
+  std::vector<short int> sol; // solution array
+  std::vector<short int> comp; // scenes to be added to this solution
 
-  int lactive, ractive; // end and start indices for left and right sets
+  short int lactive, ractive; // end and start indices for left and right sets
   int lower_bound;      // solution's lower bound. It's the solution cost if lactive == ractive
 
-  solution(int elems=0);
+  solution(short int elems=0);
   solution(const solution& other) { *this = other; }
 
   // Copies a solution
@@ -42,9 +42,9 @@ extern std::mutex sol_lock;  // Solution mutex
 extern solution best_sol; // best solution so far
 
 extern std::vector<std::vector<bool>> t; // t matrix
-extern std::vector<int> costs, wdays; // cost array for each actor
-extern std::vector<int> scene_costs; // total cost array for each scene
-extern int nscenes, nactors; // number of scenes and actors
+extern std::vector<int> costs, scene_costs; // cost array for each actor
+extern std::vector<short int> wdays; 
+extern short int nscenes, nactors; // number of scenes and actors
 extern long long unsigned nexplored; // number of explored nodes on tree
 
 // Necessary for branch and bound algorithm

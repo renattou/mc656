@@ -1,6 +1,8 @@
 \documentclass[a4paper,11pt,twoside]{article}
 \usepackage[portuguese]{babel}
 \usepackage[utf8]{inputenc}
+\usepackage{mathtools}
+\usepackage{amssymb}
 
 \title{Relatorio MC658}
 \author{Tiago L. Gimenes - 118827\\
@@ -16,8 +18,112 @@ TODO
 TODO
 
 \section{Modelo PLI}
-Para entendermos o modelo PLI temos que, primeiramente, definir corretamente as
-variaveis a serem utilizadas.
+\subsection{Entrada e constantes}
+Seja $n$ a quantidade de cenas, $m$ a quantiade de atores e $b$ a quantidade de
+dias. Como somente uma cena é gravada por dia, temos que $n = b$. Sejam $N=\{1..n\}$,
+$M = \{1..m\}$ e $B=\{1..b\}$ os conjuntos que representam as cenas, atores e dias
+respectivamente. Da entrada do problema, podemos definir as seguintes constantes:
+
+\begin{equation}
+  t_{ij} = \begin{dcases*}
+              1 & se ator $i \in M$ esta na cena $j \in N$ \\
+              0 & se nao.
+           \end{dcases*}
+\end{equation}
+
+\begin{equation}
+  c_{i} = \begin{dcases*} k \in \mathbb{N} & salario diario do ator $i \in M$ \end{dcases*}
+\end{equation}
+
+\begin{equation}
+  s_{i} = \begin{dcases*} \sum_{j \in N} t_{ij} \in \mathbb{N} & numero de cenas que o ator $i \in M$ participa\end{dcases*}
+\end{equation}
+
+\subsection{Variáveis}
+Para formular esse problema, utilizaremos as seguintes variaveis:
+
+\begin{equation}
+  p_{jl} = \begin{dcases*}
+              1 & se cena $j \in N$ esta no dia $l \in B$ \\
+              0 & se nao.
+           \end{dcases*}
+  \label{pjl}
+\end{equation}
+
+\begin{equation}
+  x_{il} = \begin{dcases*}
+              1 & se ator $i \in M$ esta no dia $l \in B$ \\
+              0 & se nao.
+           \end{dcases*}
+  \label{xil}
+\end{equation}
+
+\begin{equation}
+  e_{i} = \begin{dcases*} k \in B & dia em que ator $i \in M$ começa a trabalhar \end{dcases*}
+  \label{ei}
+\end{equation}
+
+\begin{equation}
+  d_{i} = \begin{dcases*} k \in B & dia em que ator $i \in M$ termina de trabalhar \end{dcases*}
+  \label{di}
+\end{equation}
+
+\begin{equation}
+  h_{i} = \begin{dcases*} k \in B & dias de espera do ator $i \in M$ \end{dcases*}
+  \label{hi}
+\end{equation}
+
+Intuitivamente, as variaveis (\ref{pjl}) representam se uma cena esta em certo dia
+ou nao, ou seja, ela representa a ordem das cenas. Visto que há uma variavel para
+cada par de indices $jl$, temos $O(n*b) = O(n^2)$ variáveis do tipo $p_{jl}$. As
+variáveis do tipo (\ref{xil}) representam se um determinado ator fará uma cena
+em um determinado dia. Neste caso, há $O(m*b) = O(m*n)$ variáveis do tipo $x_{il}$.
+
+As variáveis do tipo (\ref{ei}) e (\ref{di}) representam, respectivamente, os dias em que o ator
+começa e termina de participar das cenas, ou seja, elas marcam a participação
+mais a esquerda e mais a direita de um ator em uma ordenação das cenas. Como há
+uma variável de cada tipo para cada ator, há $O(m)$ variáveis deste tipo no programa.
+
+As variáveis (\ref{hi}) representam os dias de espera de um determinado ator, como
+descrito no enunciado. Há também $O(m)$ variáveis deste tipo no programa linear.
+\subsection{Restrições}
+Há basicamente sete conjuntos de restrições abaixo. Cada restrição pode ser encontrada
+à esquerda do símbolo de chaves. À direita é mostrado o dominio das variaveis livres
+e, logo após, é dada uma breve descrição da restrição:
+\begin{equation}
+  \sum_{j \in N} p_{jl} = 1 \begin{dcases*} \forall l \in B & Uma cena por dia \end{dcases*}
+  \label{cena_dia}
+\end{equation}
+
+\begin{equation}
+  \sum_{l \in B} p_{jl} = 1 \begin{dcases*} \forall j \in N & Um dia por cena \end{dcases*}
+  \label{dia_cena}
+\end{equation}
+
+\begin{equation}
+  \sum_{j \in N} t_{ij} p_{jl} = x_{il} \begin{dcases*} \forall i \in M, l \in B & ator esta no dia se estiver na cena desse dia \end{dcases*}
+  \label{actor_cene_day}
+\end{equation}
+
+\begin{equation}
+  e_{i} \leq n + (l-n)x_{il} \begin{dcases*} \forall i \in M, l \in B & primeiro dia do ator \end{dcases*}
+  \label{first_day}
+\end{equation}
+
+\begin{equation}
+  d_{i} \geq lx_{il} \begin{dcases*} \forall i \in M, l \in B & ultimo dia do ator \end{dcases*}
+  \label{last_day}
+\end{equation}
+
+\begin{equation}
+  d_{i} - e_i + 1 - s_i = h_i \begin{dcases*} \forall i \in M & dias ociosos \end{dcases*}
+  \label{wait}
+\end{equation}
+
+\begin{equation}
+  \sum_{i=1}^j p_{in} \leq 1 - p_{j1} \begin{dcases*} \forall j \in N & quebra de simetria \end{dcases*}
+  \label{sem_simetria}
+\end{equation}
 
 \section{Branch and Bound}
 TODO
