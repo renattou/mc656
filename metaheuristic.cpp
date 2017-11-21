@@ -27,17 +27,17 @@ int get_cost(solution& sol)
 {
   int cost = 0;
   // Calculates cost for each actor
-  for (int i = 0; i < nactors; i++) {
-    int first_day = 0, last_day = nscenes - 1;
+  for (short i = 0; i < nactors; i++) {
+    short first_day = 0, last_day = nscenes - 1;
     // Finds first day of work
-    for (int j = 0; j < nscenes; j++) {
+    for (short j = 0; j < nscenes; j++) {
       if (t[i][sol.sol[j]]) {
         first_day = j;
         break;
       }
     }
     // Finds last day of work
-    for (int j = nscenes-1; j >= 0; j--) {
+    for (short j = nscenes-1; j >= 0; j--) {
       if (t[i][sol.sol[j]]) {
         last_day = j;
         break;
@@ -54,12 +54,12 @@ int get_cost(solution& sol)
 void greedy_solution(solution& sol)
 {
   // List of pairs (scene, scene cost)
-  using scenes_t = std::pair<int, int>;
+  using scenes_t = std::pair<short, int>;
   std::vector<scenes_t> scenes;
   scenes.reserve(sol.comp.size());
 
   // Gets only remaining scenes
-  for (int scene: sol.comp) {
+  for (short scene: sol.comp) {
     scenes.push_back(std::make_pair(scene, scene_costs[scene]));
   }
 
@@ -68,7 +68,7 @@ void greedy_solution(solution& sol)
 
   // Completes solution
   for (auto& scene: scenes) {
-    int idx = ++sol.lactive - 1;
+    short idx = ++sol.lactive - 1;
     sol.sol[idx] = scene.first;
   }
   sol.comp.clear();
@@ -85,8 +85,8 @@ void get_neighbour(solution& sol, solution& new_sol)
   new_sol = sol;
 
   // Randomizes two scenes to swap
-  int idx1 = rand() % nscenes;
-  int idx2 = idx1;
+  short idx1 = rand() % nscenes;
+  short idx2 = idx1;
   while (idx1 == idx2) {
     idx2 = rand() % nscenes;
   }
@@ -193,11 +193,11 @@ void simmulated_anneling(float time_max)
 void random_solution(solution& sol)
 {
   // List of scenes
-  std::vector<int> scenes;
+  std::vector<short> scenes;
   scenes.reserve(sol.comp.size());
 
   // Gets only remaining scenes
-  for (int scene: sol.comp) {
+  for (short scene: sol.comp) {
     scenes.push_back(scene);
   }
 
@@ -206,7 +206,7 @@ void random_solution(solution& sol)
 
   // Completes solution
   for (auto& scene: scenes) {
-    int idx = ++sol.lactive - 1;
+    short idx = ++sol.lactive - 1;
     sol.sol[idx] = scene;
   }
   sol.comp.clear();

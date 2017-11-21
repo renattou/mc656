@@ -30,7 +30,7 @@ int main(int argc, char **argv)
   read_input(argv[1]);
 
   // Lets do our heuristics first to find a good bound for the algorithm
-  genetic_algorithm(500);
+  genetic_algorithm(100);
 
   // Creates tree root with empty solution
   sol_tree.push_back(solution(nscenes));
@@ -119,9 +119,6 @@ void compute_Q(solution& sol, std::vector<short>& bl, std::vector<std::pair<shor
       if(t[actor][scene]) {
         actors.push_back(actor);
         cost += costs[actor];
-
-        // std::get<1>(candidates.back()).push_back(actor);
-        // std::get<2>(candidates.back()) += costs[actor];
       }
     }
 
@@ -270,26 +267,9 @@ void explore()
 
       // updates heap with freshly added nodes
       for(int it = std::max(st_size-1, 1); it < (int)sol_tree.size(); it++) {
-        // std::cerr << "Pushing heap... " << sol_tree.size();
         std::push_heap(sol_tree.begin(), sol_tree.begin()+it);
-        // std::cerr << "[Done]" << std::endl;
       }
     }
-
-    // Try not to take too much memory by removing some inactive nodes from
-    // time to time
-    // if(nexplored/mem > 1e5 && sol_tree.size() > 5e5)
-    // {
-    //   mem++;
-    //
-    //   for(int i=sol_tree.size()-1; i >= 0; i--) {
-    //     if(sol_tree[i].lower_bound >= best_sol.lower_bound)
-    //       sol_tree.erase(sol_tree.begin()+i, sol_tree.begin()+i+1);
-    //   }
-    //
-    //   // Makes the heap again
-    //   std::make_heap(sol_tree.begin(), sol_tree.end());
-    // }
   }
 }
 
