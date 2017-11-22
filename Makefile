@@ -1,6 +1,6 @@
 CC=g++
-# CXXFLAGS=-O3 -std=c++11
-CXXFLAGS=-O0 -g -Wall -std=c++11
+CXXFLAGS=-O3 -std=c++11
+# CXXFLAGS=-O0 -g -Wall -std=c++11
 
 all: bnb heur
 

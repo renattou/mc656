@@ -247,7 +247,7 @@ void explore()
           new_node.comp.erase(new_node.comp.begin()+it, new_node.comp.begin()+it+1);
           new_node.sol[idx] = scene;
 
-          std::cerr << new_node.sol.size() << std::endl;
+          // std::cerr << new_node.sol.size() << std::endl;
 
           new_node.lower_bound = lower_bound(new_node);
 

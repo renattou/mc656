@@ -1,4 +1,4 @@
-\documentclass[a4paper,11pt,twoside]{article}
+\documentclass[a4paper,11pt]{article}
 \usepackage[portuguese]{babel}
 \usepackage[utf8]{inputenc}
 \usepackage{mathtools}
@@ -185,8 +185,39 @@ onde um \textit{heap} foi utilizado para a manutenção da fila de prioridade. A
 desta fila é medida através do menor limitante inferior de um nó da árvore, com empates favorecendo
 nós mais profundos.
 
-\subsection{Heurística para obtenção do conjunto Q}
-TODO
+Também com o intuito de se podar mais nós, quando um nó é explorado, para cada filho,
+a solução parcial é completada através de um algoritmo guloso rapido para tentar se obter
+limitantes primais melhores. Caso o custo da solução gulosa seja igual à do limitante
+inferior para aquele nó, não é necessaria a exploração deste ramo. Caso a solução gulosa seja melhor
+do que a melhor solução encontrada até o momento, a melhor solução é atualizada
+para a gulosa.
+
+\subsection{Heurística para obtenção do empacotamento $Q$}
+Seguindo a dica do enunciado de utilizar um algoritmo guloso rapido com o intuito
+de maximizar o tamanho do empacotamento $Q$, propomos um algoritmo que tenta
+adicionar à $Q$ cenas com o menor numero de atores possivel, minimizando a probabilidade
+de conflito de atores com outras cenas de $Q$, maximizando o empacotamento.
+
+Sem perda de generalidade, supomos que estamos calculando o
+limitante $k_3$, logo o conjunto de atores validos a ser procurado o empacotamento
+de cenas $Q$ é $B_E(P)$. Seja $C$ o conjunto de cenas que ainda não foram programadas nem à esquerda nem
+à direita na solução parcial.
+
+Primeiramente começamos à calcular o custo de cada cena $c \in C$, de acordo com
+o enunciado, somando os custos dos atores de $B_E(P)$ presentes na cena $c$. Também
+é calculado nessa parte quantidade de atores de $B_E(P)$ na cena $c$.
+
+Com os custos e quantidade de atores em cada cena calculados, começamos por ordena-las
+em ordem não decrescente de frequencia de aparição dos atores, eliminando
+as cenas com custo igual a zero. Percorremos então o vetor de cenas ordernado,
+adicionando cenas à $Q$ sempre que possivel, ou seja, tal que os atores presentes
+na cena atual não esteja ainda presente em nenhuma outra cena de $Q$, respeitando as condições
+do enunciado.
+
+Por fim, o empacotamento $Q$ é ordenado em ordem não crescente de custo, e retornado.
+
+Mudando o conjunto $B_E(P)$ por $B_D(P)$ podemos calcular o empacotamento para o
+limitante $k_4$ utilizando o mesmo algoritmo descrito acima.
 
 \section{Experimentos}
 TODO
