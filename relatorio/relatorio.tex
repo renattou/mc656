@@ -4,7 +4,7 @@
 \usepackage{mathtools}
 \usepackage{amssymb}
 
-\title{Relatorio MC658}
+\title{Relatório MC658}
 \author{Tiago L. Gimenes - 118827\\
         Renato L. Vargas - 118557}
 
@@ -19,42 +19,42 @@ TODO
 
 \section{Modelo PLI}
 \subsection{Entrada e constantes}
-Seja $n$ a quantidade de cenas, $m$ a quantiade de atores e $b$ a quantidade de
+Seja $n$ a quantidade de cenas, $m$ a quantidade de atores e $b$ a quantidade de
 dias. Como somente uma cena é gravada por dia, temos que $n = b$. Sejam $N=\{1..n\}$,
 $M = \{1..m\}$ e $B=\{1..b\}$ os conjuntos que representam as cenas, atores e dias
 respectivamente. Da entrada do problema, podemos definir as seguintes constantes:
 
 \begin{equation}
   t_{ij} = \begin{dcases*}
-              1 & se ator $i \in M$ esta na cena $j \in N$ \\
-              0 & se nao.
+              1 & se ator $i \in M$ está na cena $j \in N$ \\
+              0 & se não.
            \end{dcases*}
   \label{tij}
 \end{equation}
 
 \begin{equation}
-  c_{i} = \begin{dcases*} k \in \mathbb{N} & salario diario do ator $i \in M$ \end{dcases*}
+  c_{i} = \begin{dcases*} k \in \mathbb{N} & salário diário do ator $i \in M$ \end{dcases*}
 \end{equation}
 
 \begin{equation}
-  s_{i} = \begin{dcases*} \sum_{j \in N} t_{ij} \in \mathbb{N} & numero de cenas que o ator $i \in M$ participa\end{dcases*}
+  s_{i} = \begin{dcases*} \sum_{j \in N} t_{ij} \in \mathbb{N} & número de cenas que o ator $i \in M$ participa\end{dcases*}
 \end{equation}
 
 \subsection{Variáveis}
-Para formular esse problema, utilizaremos as seguintes variaveis:
+Para formular esse problema, utilizaremos as seguintes variáveis:
 
 \begin{equation}
   p_{jl} = \begin{dcases*}
-              1 & se cena $j \in N$ esta no dia $l \in B$ \\
-              0 & se nao.
+              1 & se cena $j \in N$ está no dia $l \in B$ \\
+              0 & se não.
            \end{dcases*}
   \label{pjl}
 \end{equation}
 
 \begin{equation}
   x_{il} = \begin{dcases*}
-              1 & se ator $i \in M$ esta no dia $l \in B$ \\
-              0 & se nao.
+              1 & se ator $i \in M$ está no dia $l \in B$ \\
+              0 & se não.
            \end{dcases*}
   \label{xil}
 \end{equation}
@@ -74,9 +74,9 @@ Para formular esse problema, utilizaremos as seguintes variaveis:
   \label{hi}
 \end{equation}
 
-Intuitivamente, as variaveis (\ref{pjl}) representam se uma cena esta em certo dia
-ou nao, ou seja, ela representa a ordem das cenas. Visto que há uma variavel para
-cada par de indices $jl$, temos $O(n*b) = O(n^2)$ variáveis do tipo $p_{jl}$. As
+Intuitivamente, as variáveis (\ref{pjl}) representam se uma cena está em certo dia
+ou não, ou seja, ela representa a ordem das cenas. Visto que há uma variável para
+cada par de índices $jl$, temos $O(n*b) = O(n^2)$ variáveis do tipo $p_{jl}$. As
 variáveis do tipo (\ref{xil}) representam se um determinado ator fará uma cena
 em um determinado dia. Neste caso, há $O(m*b) = O(m*n)$ variáveis do tipo $x_{il}$.
 
@@ -89,7 +89,7 @@ As variáveis (\ref{hi}) representam os dias de espera de um determinado ator, c
 descrito no enunciado. Há também $O(m)$ variáveis deste tipo no programa linear.
 \subsection{Restrições}
 Há basicamente sete conjuntos de restrições abaixo. Cada restrição pode ser encontrada
-à esquerda do símbolo de chaves. À direita é mostrado o dominio das variaveis livres
+à esquerda do símbolo de chaves. À direita é mostrado o domínio das variáveis livres
 e, logo após, é dada uma breve descrição da restrição:
 \begin{equation}
   \sum_{j \in N} p_{jl} = 1 \begin{dcases*} \forall l \in B & Uma cena por dia \end{dcases*}
@@ -102,7 +102,7 @@ e, logo após, é dada uma breve descrição da restrição:
 \end{equation}
 
 \begin{equation}
-  \sum_{j \in N} t_{ij} p_{jl} = x_{il} \begin{dcases*} \forall i \in M, l \in B & ator esta no dia se estiver na cena desse dia \end{dcases*}
+  \sum_{j \in N} t_{ij} p_{jl} = x_{il} \begin{dcases*} \forall i \in M, l \in B & ator está no dia se estiver na cena desse dia \end{dcases*}
   \label{actor_cene_day}
 \end{equation}
 
@@ -112,7 +112,7 @@ e, logo após, é dada uma breve descrição da restrição:
 \end{equation}
 
 \begin{equation}
-  d_{i} \geq lx_{il} \begin{dcases*} \forall i \in M, l \in B & ultimo dia do ator \end{dcases*}
+  d_{i} \geq lx_{il} \begin{dcases*} \forall i \in M, l \in B & último dia do ator \end{dcases*}
   \label{last_day}
 \end{equation}
 
@@ -130,15 +130,15 @@ As restrições (\ref{cena_dia}) e (\ref{dia_cena}) fazem com que haja somente u
 cena por dia e um dia por cena respectivamente. Há um total de $O(n)$ restrições
 de cada tipo
 
-As restrições (\ref{actor_cene_day}) realizam a semantica das variáveis (\ref{xil}).
-Note que, como há somente uma cena por dia e que as variaveis (\ref{pjl}) e (\ref{tij})
+As restrições (\ref{actor_cene_day}) realizam a semântica das variáveis (\ref{xil}).
+Note que, como há somente uma cena por dia e que as variáveis (\ref{pjl}) e (\ref{tij})
 são booleanas, o resultado da soma do lado esquerdo também é booleano. Há $O(m*n)$
 restrições desse tipo.
 
 As restrições (\ref{first_day}) e (\ref{last_day}) contam, respectivamente, o
-primeiro e ultimo dia em que o ator gravará uma cena. Note que, como há $O(n)$
-restrições desse tipo para cada ator, essas restrições são equivalentes à um
-minimo para o caso de (\ref{first_day}) e à um máximo para o caso de (\ref{last_day}).
+primeiro e último dia em que o ator gravará uma cena. Note que, como há $O(n)$
+restrições desse tipo para cada ator, essas restrições são equivalentes a um
+mínimo para o caso de (\ref{first_day}) e a um máximo para o caso de (\ref{last_day}).
 Há um total de $O(m*n)$ restrições desse tipo.
 
 Restrições do tipo (\ref{wait}) contabilizam os dias ociosos de cada ator, havendo
@@ -147,9 +147,9 @@ somente $O(m)$ restrições desse tipo.
 Somente com as restrições de \ref{cena_dia} à \ref{wait}, uma solução do programa
 linear, é solução do problema de ordenação de cenas. As retrições \ref{sem_simetria}
 entram com o intuito de quebrar simetrias na solução e então, fazer com que o PLI
-evite revisar algumas soluções, aumentando o tamanho das instancias resolvidas pelo PLI.
+evite revisar algumas soluções, aumentando o tamanho das instâncias resolvidas pelo PLI.
 Essas restrições evitam soluções espelhadas em torno da cena cental. Há $O(n)$ restrições
-deste tipo
+deste tipo.
 
 \subsection{Função objetivo}
 A função objetivo pode ser formulada facilmente em função das variáveis e constantes
@@ -160,58 +160,58 @@ seguindo o enunciado:
 \end{equation}
 
 \subsection{Formulação final}
-A formulação final consta com todas as $O(nm + n^2)$ variaveis e as $O(nm)$
-restrições descritas acima
+A formulação final consta com todas as $O(nm + n^2)$ variáveis e as $O(nm)$
+restrições descritas acima.
 
 \section{Branch and Bound}
 A implementação do algoritmo de \textit{branch and bound} seguiu os passos principais
-descritos no enunciado, com as diferenças descritas nesta secção.
+descritos no enunciado, com as diferenças descritas nesta seção.
 
 \subsection{Inicialização da solução primal}
-Opostamente à dica do enunciado de se fazer uma busca em profundidade na arvore
+Opostamente à dica do enunciado de se fazer uma busca em profundidade na árvore
 de soluções, para se achar uma solução primal inicial, utilizamos a metaheurística
 implementada neste trabalho (algoritmo genético). A metaheurística é executada
 por 100ms antes da execução do algoritmo de \textit{branch and bound}.
 
 Utilizamos a metaheurística com o intuito de que ela poderia proporcionar uma
 boa solução primal com relativamente pouco esforço computacional. Essa premissa
-se mostrou valida em alguns casos, onde a solução encontrada pela metaheurística
+se mostrou válida em alguns casos, onde a solução encontrada pela metaheurística
 não estava tão distante da solução ótima, mas se mostrou falsa em outros casos
 onde a metaheurística ficou presa em mínimos locais.
 
 \subsection{Exploração da arvore de soluções}
-A arvore de soluções foi explorada através de uma estratégia de \textit{best bound},
+A árvore de soluções foi explorada através de uma estratégia de \textit{best bound},
 onde um \textit{heap} foi utilizado para a manutenção da fila de prioridade. A prioridade
 desta fila é medida através do menor limitante inferior de um nó da árvore, com empates favorecendo
 nós mais profundos.
 
 Também com o intuito de se podar mais nós, quando um nó é explorado, para cada filho,
-a solução parcial é completada através de um algoritmo guloso rapido para tentar se obter
+a solução parcial é completada através de um algoritmo guloso rápido para tentar se obter
 limitantes primais melhores. Caso o custo da solução gulosa seja igual à do limitante
 inferior para aquele nó, não é necessaria a exploração deste ramo. Caso a solução gulosa seja melhor
 do que a melhor solução encontrada até o momento, a melhor solução é atualizada
 para a gulosa.
 
 \subsection{Heurística para obtenção do empacotamento $Q$}
-Seguindo a dica do enunciado de utilizar um algoritmo guloso rapido com o intuito
+Seguindo a dica do enunciado de utilizar um algoritmo guloso rápido com o intuito
 de maximizar o tamanho do empacotamento $Q$, propomos um algoritmo que tenta
-adicionar à $Q$ cenas com o menor numero de atores possivel, minimizando a probabilidade
+adicionar à $Q$ cenas com o menor número de atores possível, minimizando a probabilidade
 de conflito de atores com outras cenas de $Q$, maximizando o empacotamento.
 
 Sem perda de generalidade, supomos que estamos calculando o
-limitante $k_3$, logo o conjunto de atores validos a ser procurado o empacotamento
+limitante $k_3$, logo o conjunto de atores válidos a ser procurado o empacotamento
 de cenas $Q$ é $B_E(P)$. Seja $C$ o conjunto de cenas que ainda não foram programadas nem à esquerda nem
 à direita na solução parcial.
 
-Primeiramente começamos à calcular o custo de cada cena $c \in C$, de acordo com
+Primeiramente começamos a calcular o custo de cada cena $c \in C$, de acordo com
 o enunciado, somando os custos dos atores de $B_E(P)$ presentes na cena $c$. Também
 é calculado nessa parte quantidade de atores de $B_E(P)$ na cena $c$.
 
-Com os custos e quantidade de atores em cada cena calculados, começamos por ordena-las
-em ordem não decrescente de frequencia de aparição dos atores, eliminando
+Com os custos e quantidade de atores em cada cena calculados, começamos por ordená-las
+em ordem não decrescente de frequência de aparição dos atores, eliminando
 as cenas com custo igual a zero. Percorremos então o vetor de cenas ordernado,
-adicionando cenas à $Q$ sempre que possivel, ou seja, tal que os atores presentes
-na cena atual não esteja ainda presente em nenhuma outra cena de $Q$, respeitando as condições
+adicionando cenas à $Q$ sempre que possível, ou seja, tal que os atores presentes
+na cena atual não estejam ainda presentes em nenhuma outra cena de $Q$, respeitando as condições
 do enunciado.
 
 Por fim, o empacotamento $Q$ é ordenado em ordem não crescente de custo, e retornado.
