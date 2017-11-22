@@ -11,8 +11,14 @@
 \begin{document}
 \maketitle
 
-\section{Introdução}
-TODO
+\section*{Introdução}
+Neste trabalho tentamos atacar o problema de ordenação de cenas através de três
+abordagens diferentes. Primeiramente com algoritmos exatos (PLI e B\&B) e em seguida
+uma metaheurística (algoritmo genético). O algoritmo genético se mostrou muito bom
+em 10/11 experimentos, errando em, ao máximo, 50 unidades. O algoritmo de B\&B
+proposto se mostrou capaz de resolver instancias relativamente grandes (com 18 cenas)
+, equanto que o PLI se mostrou como um bom validador de resultados para os outros
+algoritmos.
 
 \section{Metaheurística}
 TODO
@@ -220,7 +226,71 @@ Mudando o conjunto $B_E(P)$ por $B_D(P)$ podemos calcular o empacotamento para o
 limitante $k_4$ utilizando o mesmo algoritmo descrito acima.
 
 \section{Experimentos}
-TODO
+Os experimentos a seguir foram executados em um Intel Core i7-4700MQ 2.40GHz com
+16GB de memória RAM e compilados com GCC 7.2.0.
+
+\subsection{Metaheurística}
+\begin{table}[h]
+  \centering
+  \begin{tabular}{c & c & c}
+    Dataset & Função Objetivo & Tempo de execução(s) \\
+    e0806.txt & 4   & 30 \\
+    e1006.txt & 12  & 30 \\
+    e1008.txt & 74  & 30 \\
+    e1010.txt & 451 & 30 \\
+    e1206.txt & 26  & 30 \\
+    e1208.txt & 69  & 30 \\
+    e1210.txt & 115 & 30 \\
+    e1211.txt & 113 & 30 \\
+    e1410.txt & 120 & 30 \\
+    e1411.txt & 137 & 30 \\
+    e1808.txt & 145 & 30 \\
+  \end{tabular}
+  \caption{Resultados para a Metaheurística(algoritmo genético)}
+  \label{meta}
+\end{table}
+
+\subsection{PLI}
+\begin{table}[h]
+  \centering
+  \begin{tabular}{c & c & c & c & c}
+    Dataset & Função Objetivo & Lim. dual & Nós explorados  & Tempo de execução(s) \\
+    e0806.dat & 4   & 4  & 75     & 0.02   \\
+    e1006.dat & 12  & 12 & 1645   & 0.79   \\
+    e1008.dat & 24  & 24 & 2999   & 1.72   \\
+    e1010.dat & 51  & 51 & 21849  & 21.26  \\
+    e1206.dat & 22  & 22 & 67251  & 63.17  \\
+    e1208.dat & 80  & 0  & 105249 & 180.01 \\
+    e1210.dat & 81  & 4  & 104101 & 180.01 \\
+    e1211.dat & 113 & 0  & 78081  & 180.01 \\
+    e1410.dat & 125 & 0  & 81965  & 180.02 \\
+    e1411.dat & 177 & 0  & 69353  & 180.01 \\
+    e1808.dat & 191 & 0  & 67057  & 180.02 \\
+  \end{tabular}
+  \caption{Resultados para o PLI}
+  \label{pli}
+\end{table}
+
+\subsection{Branch and Bound}
+\begin{table}[h]
+  \centering
+  \begin{tabular}{c & c & c & c & c}
+  Dataset & Função Objetivo & Lim. dual & Nós explorados  & Tempo de execução(s) \\
+  e0806.txt & 4   & 4   & 75       & 0.10 \\
+  e1006.txt & 12  & 12  & 1334     & 0.10 \\
+  e1008.txt & 24  & 24  & 388      & 0.10 \\
+  e1010.txt & 51  & 51  & 275      & 0.10 \\
+  e1206.txt & 22  & 22  & 16672    & 0.18 \\
+  e1208.txt & 69  & 69  & 69305    & 0.46 \\
+  e1210.txt & 81  & 81  & 116069   & 0.76 \\
+  e1211.txt & 104 & 104 & 15675    & 0.21 \\
+  e1410.txt & 115 & 115 & 504148   & 3.62 \\
+  e1411.txt & 132 & 132 & 256840   & 2.38 \\
+  e1808.txt & 135 & 135 & 12127193 & 139.70 \\
+  \end{tabular}
+  \caption{Resultados para o Branch and Bound}
+  \label{bnb}
+\end{table}
 
 \section{Conclusão}
 TODO
