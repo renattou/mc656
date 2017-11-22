@@ -13,5 +13,8 @@ heur: heur.cpp common.cpp metaheuristic.cpp
 pli-solver: pli-solver.c
 	gcc -O3 pli-solver.c -lglpk -o pli-solver
 
+pack:
+	tar -zcvf ra118827-ra118557.tar.gz *.hpp *.cpp relatorio/relatorio.pdf pli.mod Makefile 
+
 clear:
 	rm -f bnb heur pli-solver

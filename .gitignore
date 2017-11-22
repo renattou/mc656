@@ -18,3 +18,5 @@ relatorio/*.pdf
 relatorio/*.fdb_latexmk
 relatorio/*.fls
 relatorio/*.gz
+
+*.tar.gz
