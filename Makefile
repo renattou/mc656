@@ -14,7 +14,7 @@ pli-solver: pli-solver.c
 	gcc -O3 pli-solver.c -lglpk -o pli-solver
 
 pack:
-	tar -zcvf ra118827-ra118557.tar.gz *.hpp *.cpp relatorio/relatorio.pdf pli.mod Makefile 
+	tar -zcvf ra118557-ra118827.tar.gz *.hpp *.cpp pli.mod Makefile -C relatorio relatorio.pdf
 
 clear:
 	rm -f bnb heur pli-solver
