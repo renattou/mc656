@@ -151,7 +151,6 @@ void compute_Q(solution& sol, std::vector<short>& bl, std::vector<std::pair<shor
 
     // If none of the actors of this scene were used yet, try adding the scene
     if(add_scene) {
-      // std::cout << "(" << scene << "," << cost << "," << actors << ")" << std::endl;
       Q.push_back(std::make_pair(scene, cost)); // adds the scene
       for(short actor: actors) used_actors[actor] = true; // adds to used actors
     }
@@ -209,13 +208,8 @@ int lower_bound(solution& sol)
 // Explores the solution tree by using branch and bound - best fit
 void explore()
 {
-  // int mem = 1; // used at memory management
-
   while(sol_tree.size() > 0 && sol_tree.front().lower_bound < best_sol.lower_bound)
   {
-    // Number of explored nodes
-    nexplored++;
-
     // If we've found a possible solution
     if(sol_tree.front().comp.size() == 0)
     {
@@ -225,10 +219,14 @@ void explore()
         update_solution(sol_tree.front());
       }
 
+      // pop from heap
       std::pop_heap(sol_tree.begin(), sol_tree.end());
       sol_tree.pop_back();
     } else
     {
+      // Increase number of explored nodes
+      nexplored++;
+
       int st_size = sol_tree.size(), idx = -1, min = -1;
 
       if(sol_tree.front().lactive == (short)sol_tree.front().sol.size() - sol_tree.front().ractive) {
@@ -248,6 +246,9 @@ void explore()
           solution new_node(sol_tree.front());
           new_node.comp.erase(new_node.comp.begin()+it, new_node.comp.begin()+it+1);
           new_node.sol[idx] = scene;
+
+          std::cerr << new_node.sol.size() << std::endl;
+
           new_node.lower_bound = lower_bound(new_node);
 
           // Completes the partial solution candidate by using a greedy algorithm

@@ -27,8 +27,8 @@ solution& solution::operator=(const solution& other)
   this->ractive = other.ractive;
   this->lower_bound = other.lower_bound;
 
-  this->sol = other.sol;
-  this->comp = other.comp;
+  this->sol.assign(other.sol.begin(), other.sol.end());
+  this->comp.assign(other.comp.begin(), other.comp.end());
 
   return *this;
 }
