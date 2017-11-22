@@ -15,8 +15,8 @@
 // Constants
 const float T_ZERO = 100; // Initial temperature
 const float K = 1; // Constant for probability
-const int N_STEPS = 10; // Number maximum of steps without improving solution
-const int N_MEMBERS = 25; // Size of population (use odd numbers to crossover all but the fittest)
+const short N_STEPS = 10; // Number maximum of steps without improving solution
+const short N_MEMBERS = 25; // Size of population (use odd numbers to crossover all but the fittest)
 const float MUTATION_RATE = 0.01f; // Probability of mutating a gene
 const float CROSSOVER_MIN_RATE = 0.5f; // Min percentage of genes to be crossed-over
 const float CROSSOVER_MAX_RATE = 0.8f; // Max percentage of genes to be crossed-over
@@ -134,7 +134,7 @@ void simmulated_anneling(float time_max)
   int iteration = 0;
   while (temperature > 0) {
     // Generate new solution for a maximum of N steps without improvement
-    for (int i = 0; i < N_STEPS; i++) {
+    for (short i = 0; i < N_STEPS; i++) {
       // Gets new solution
       iteration++;
       solution new_sol;
@@ -222,7 +222,7 @@ solution get_fittest(std::vector<solution>& population, int& total_fitness)
   int fittest_idx = 0;
   total_fitness = 0;
   // Search fittest individual of population
-  for (int i = 1; i < (int)population.size(); i++) {
+  for (short i = 1; i < (short)population.size(); i++) {
     if (population[i].lower_bound <= population[fittest_idx].lower_bound) {
       fittest_idx = i;
     }
@@ -241,15 +241,15 @@ solution get_fittest(std::vector<solution>& population, int& total_fitness)
 void crossover(solution& individual_1, solution& individual_2)
 {
   // Chooses crossover type
-  int crossover_type = rand() % 3;
+  short crossover_type = rand() % 3;
 
   // Copies individual 1
   solution temp_individual_1 = individual_1;
 
   // Crossover range
-  int min_range = (int)std::ceil(CROSSOVER_MIN_RATE * nscenes);
-  int max_range = (int)std::ceil(CROSSOVER_MAX_RATE * nscenes);
-  int range = min_range + rand() % (max_range - min_range + 1);
+  short min_range = (short)std::ceil(CROSSOVER_MIN_RATE * nscenes);
+  short max_range = (short)std::ceil(CROSSOVER_MAX_RATE * nscenes);
+  short range = min_range + rand() % (max_range - min_range + 1);
   if (range == 0) {
     return;
   }
@@ -260,7 +260,7 @@ void crossover(solution& individual_1, solution& individual_2)
   }
 
   // Crossover indexes
-  int min, max, idx1, idx2;
+  short min, max, idx1, idx2;
   if (crossover_type <= 0) {
     // Does crossover at the beginning
     min = 0;
@@ -319,11 +319,11 @@ void crossover(solution& individual_1, solution& individual_2)
 void mutate(solution& individual)
 {
   // Chooses mutation type
-  int mutation_type = rand() % 3;
+  short mutation_type = rand() % 3;
 
   // Tries mutating every scene by swapping
-  int idx2 = 0;
-  for (int idx1 = 0; idx1 < nscenes - 1; idx1++) {
+  short idx2 = 0;
+  for (short idx1 = 0; idx1 < nscenes - 1; idx1++) {
     float mutation_chance = (double)rand() / (RAND_MAX);
     if (mutation_chance < MUTATION_RATE) {
       if (mutation_type <= 0) {
@@ -343,7 +343,7 @@ void mutate(solution& individual)
         idx2 = idx1 + 1 + rand() % (nscenes - idx1 - 1);
       }
       // Swaps scenes
-      int scene1 = individual.sol[idx1];
+      short scene1 = individual.sol[idx1];
       individual.sol[idx1] = individual.sol[idx2];
       individual.sol[idx2] = scene1;
     }
@@ -361,7 +361,7 @@ int roulette(std::vector<solution>& population, int total_fitness)
   float random_probability = (double)rand() / (RAND_MAX);
   // Searches for individual on this range
   float current_probability = 0;
-  for (int i = 0; i < N_MEMBERS; i++) {
+  for (short i = 0; i < N_MEMBERS; i++) {
     float fitness_ratio = population[i].lower_bound / (float)total_fitness;
     current_probability += (1 - fitness_ratio) / (N_MEMBERS - 1);
     if (current_probability >= random_probability) {
@@ -385,10 +385,10 @@ void evolve_population(std::vector<solution>& population, int total_fitness)
   new_population.push_back(fittest);
 
   // Generates new individuals
-  for (int i = 1; i < N_MEMBERS; i = i + 2) {
+  for (short i = 1; i < N_MEMBERS; i = i + 2) {
     // Gets parents and creates children
-    int parent_idx1 = roulette(population, total_fitness);
-    int parent_idx2 = roulette(population, total_fitness);
+    short parent_idx1 = roulette(population, total_fitness);
+    short parent_idx2 = roulette(population, total_fitness);
 
     solution child_1 = population[parent_idx1];
     solution child_2 = population[parent_idx2];
@@ -423,7 +423,7 @@ void genetic_algorithm(float time_max)
   population.push_back(best_sol);
 
   // Randomizes individuals
-  for (int i = 1; i < N_MEMBERS; i++) {
+  for (short i = 1; i < N_MEMBERS; i++) {
     solution new_sol(nscenes);
     random_solution(new_sol);
     population.push_back(new_sol);
