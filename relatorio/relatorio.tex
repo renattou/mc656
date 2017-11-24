@@ -288,6 +288,7 @@ $N_{pop} = 25$, $C_{min} = 0.5$, $C_{max} = 0.8$ e $R_{mut} = 0.01$
 para as variáveis anteriormente definidas. Os resultados podem ser vistos na Tabela \ref{meta}.
 Como não sabemos se a metaheurística achou uma solução ótima, rodamos sempre até o tempo limite,
 como pode ser observado na tabela.
+Durante a execução do programa também são mostrados resultados geração a geração para melhor acompanhamento.
 
 \begin{longtable}{c c c}
   Dataset & Função Objetivo & Tempo de execução(s) \\
@@ -369,6 +370,21 @@ Os resultados do B\&B podem ser vistos na Tabela \ref{bnb}.
 \end{longtable}
 
 \section{Conclusão}
-TODO
+A metaheurística escolhida (algoritmo genético), quando acompanhada geração a geração, mostrou
+um desempenho satisfatório, conseguindo evoluir rapidamente durante as primeiras gerações. Entretanto,
+em vários casos, o algoritmo fica preso em locais mínimos já após o primeiro segundo de execução,
+com apenas ocasionais melhoras. Possivelmente a alteração dos hiperparâmetros pode gerar resultados melhores.
+
+O modelo de PLI formulado se mostrou correto, atingindo resultados corretos para os casos em que
+o tempo de execução foi suficiente. Entretanto, em 5 dos 11 casos, a solução ótima não foi encontrada
+no tempo limite, e em 1 dos casos, a solução ótima foi encontrada, mas o limitante dual ainda não era
+igual a solução para que a execução fosse encerrada.
+
+A formulação do Branch and Bound conseguiu encontrar soluções ótimas para todos os casos dentro
+do tempo alocado, indicando que nossa formulação é satisfatória. A utilização da metaheurística
+também gerou bons resultados, conseguindo muitas vezes soluções relativamente boas em $100ms$.
+A heurística para obtenção do empacotamento Q também conseguiu gerar bons limitantes, pois
+comparando com os resultados do PLI (nos casos em que uma solução ótima foi encontrada),
+o número de nós explorados é relativamente menor.
 
 \end{document}
