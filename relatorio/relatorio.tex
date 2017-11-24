@@ -1,9 +1,12 @@
 \documentclass[a4paper,11pt]{article}
+  \usepackage[a4paper,left=3cm,right=3cm,top=3cm,bottom=3cm]{geometry}
 \usepackage[portuguese]{babel}
 \usepackage[utf8]{inputenc}
 \usepackage{mathtools}
+\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
+\DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor}
 \usepackage{amssymb}
-\usepackage[a4paper,left=3cm,right=3cm,top=3cm,bottom=3cm]{geometry}
+\usepackage{longtable}
 
 \title{Relatório MC658}
 \author{Tiago L. Gimenes - 118827\\
@@ -15,14 +18,63 @@
 \section*{Introdução}
 Neste trabalho tentamos atacar o problema de ordenação de cenas através de três
 abordagens diferentes. Primeiramente com algoritmos exatos (PLI e B\&B) e em seguida
-uma metaheurística (algoritmo genético). O algoritmo genético se mostrou muito bom
-em 10/11 experimentos, errando em, ao máximo, 50 unidades. O algoritmo de B\&B
+uma metaheurística (algoritmo genético). O algoritmo genético se mostrou satisfatório,
+mas em vários casos ficou preso em locais mínimos em pouco tempo de execução. O algoritmo de B\&B
 proposto se mostrou capaz de resolver instâncias relativamente grandes (com 18 cenas),
 enquanto que o PLI se mostrou como um bom validador de resultados para os outros
 algoritmos.
 
 \section{Metaheurística}
-TODO
+A metaheurística implementada foi o algoritmo genético já estudado em aula.
+As especificidades da nossa implementação são descritas nessa seção.
+
+\subsection{Fitness}
+A codificação de um indivíduo é dada sempre por uma solução completa.
+A função de fitness de um indivíduo é então exatamente o custo desta solução.
+
+\subsection{Manutenção}
+Inicialmente uma população é inicializada com tamanho $N_{pop}$, onde $N_{pop}-1$ indivíduos são
+inicializados com soluções randômicas e $1$ indivíduo é inicializado com um algoritmo
+guloso, já gerando possivelmente um indivíduo mais apto.
+
+A cada geração o indivíduo mais apto é sempre preservado. São escolhidos então $(N_{pop}-1)/2$
+pares pelo método da roleta visto em sala. Esses pares são cruzados, gerando dois novos
+indivíduos. Esses novos indivíduos sofrem então possíveis mutações. Dessa forma, ao final
+de uma etapa de evolução, temos novamente $N_{pop}$ indivíduos.
+
+\subsection{Cruzamento}
+O cruzamento é sempre feito entre dois indivíduos, gerando dois outros novos.
+Existem três variações de cruzamento e cada uma delas possui $1/3$ de chance de ocorrer.
+As três variações são baseadas em métodos principal que é inspirado pelo método PBX
+para o problema do Caixeiro Viajante.
+
+Primeiramente é sorteado um número $C$ limitado por duas constantes
+$C_{min}$ e $C_{max}$, onde $C_{min}, C_{max} = \{0..1\}$ e $C_{min} \leq C_{max}$.
+Sendo $n$ o número de cenas, um trecho contínuo de tamanho $C_n = \ceil{C * n}$ é cruzado.
+
+Dado dois indivíduos $I_1$ e $I_2$, são gerados $I_3$ e $I_4$. Fora do trecho escolhido,
+as cenas de $I_3$ são iguais à $I_1$ e as de $I_4$ à $I_2$.
+Dentro do trecho, as cenas de $I_3$ são preenchidas com as cenas na ordem que estão em $I_2$,
+ignorando cenas que já estão em $I_3$ fora do trecho. O mesmo é feito para $I_4$,
+usando as cenas na ordem que estão em $I_1$.
+
+As variações consistem em começar o trecho no começo, começar em uma posição aleatória ou
+terminar no final da solução.
+
+\subsection{Mutação}
+A mutação é sempre feita em cima de um indivíduo, fazendo uma quantidade limitada
+de swaps entre cenas da solução, garantindo que as soluções geradas são sempra válidas.
+Cada swap é feito com uma probabilidade $R_{mut} = \{0..1\}$.
+Existem três variações de mutação e cada uma delas possui $1/3$ de chance de ocorrer.
+
+A primeira variação consiste em percorrer cena por cena até a penúltima, fazendo um possível
+swap entre esta cena e uma outra sorteada que deve estar após ela. São feitos no máximo $n-1$ swaps.
+
+A segunda variação consiste em percorrer cena por cena até a metade, fazendo um possível swap
+entre esta cena e a outra na mesma posição na solução inversa. São feitos no máximo $\floor{n/2}$ swaps.
+
+A terceira variação consiste em percorrer cena por cena até a penúltima, fazendo um possível swap
+entre esta cena e a cena seguinte. São feitos no máximo $n-1$ swaps.
 
 \section{Modelo PLI}
 \subsection{Entrada e constantes}
@@ -231,68 +283,76 @@ Os experimentos a seguir foram executados em um Intel Core i7-4700MQ 2.40GHz com
 16GB de memória RAM e compilados com GCC 7.2.0.
 
 \subsection{Metaheurística}
-\begin{table}[h]
-  \centering
-  \begin{tabular}{c c c}
-    Dataset & Função Objetivo & Tempo de execução(s) \\
-    h3016a.txt & 4952  & 30 \\
-    h3016b.txt & 3375  & 30 \\
-    h3016c.txt & 3750  & 30 \\
-    h3018a.txt & 5648  & 30 \\
-    h3018b.txt & 6303  & 30 \\
-    h3018c.txt & 4445  & 30 \\
-    h3020a.txt & 6538  & 30 \\
-    h3020b.txt & 4998  & 30 \\
-    h3020c.txt & 5811  & 30 \\
-    h4016a.txt & 4640  & 30 \\
-    h4016b.txt & 4946  & 30 \\
-    h4016c.txt & 3805  & 30 \\
-    h4018a.txt & 6046  & 30 \\
-    h4018b.txt & 5436  & 30 \\
-    h4018c.txt & 5439  & 30 \\
-    h4020a.txt & 8452  & 30 \\
-    h4020b.txt & 6287  & 30 \\
-    h4020c.txt & 5846  & 30 \\
-    h5016a.txt & 7533  & 30 \\
-    h5016b.txt & 6092  & 30 \\
-    h5016c.txt & 11435 & 30 \\
-    h5018a.txt & 11221 & 30 \\
-    h5018b.txt & 6743  & 30 \\
-    h5018c.txt & 7810  & 30 \\
-    h5020a.txt & 10657 & 30 \\
-    h5020b.txt & 9971  & 30 \\
-    h5020c.txt & 9070  & 30 \\
-  \end{tabular}
-  \caption{Resultados para a Metaheurística(algoritmo genético)}
+Para os experimentos do algoritmo genético foram utilizados os valores
+$N_{pop} = 25$, $C_{min} = 0.5$, $C_{max} = 0.8$ e $R_{mut} = 0.01$
+para as variáveis anteriormente definidas. Os resultados podem ser vistos na Tabela \ref{meta}.
+Como não sabemos se a metaheurística achou uma solução ótima, rodamos sempre até o tempo limite,
+como pode ser observado na tabela.
+
+\begin{longtable}{c c c}
+  Dataset & Função Objetivo & Tempo de execução(s) \\
+  \hline
+  \endhead
+  h3016a.txt & 4952  & 30 \\
+  h3016b.txt & 3375  & 30 \\
+  h3016c.txt & 3750  & 30 \\
+  h3018a.txt & 5648  & 30 \\
+  h3018b.txt & 6303  & 30 \\
+  h3018c.txt & 4445  & 30 \\
+  h3020a.txt & 6538  & 30 \\
+  h3020b.txt & 4998  & 30 \\
+  h3020c.txt & 5811  & 30 \\
+  h4016a.txt & 4640  & 30 \\
+  h4016b.txt & 4946  & 30 \\
+  h4016c.txt & 3805  & 30 \\
+  h4018a.txt & 6046  & 30 \\
+  h4018b.txt & 5436  & 30 \\
+  h4018c.txt & 5439  & 30 \\
+  h4020a.txt & 8452  & 30 \\
+  h4020b.txt & 6287  & 30 \\
+  h4020c.txt & 5846  & 30 \\
+  h5016a.txt & 7533  & 30 \\
+  h5016b.txt & 6092  & 30 \\
+  h5016c.txt & 11435 & 30 \\
+  h5018a.txt & 11221 & 30 \\
+  h5018b.txt & 6743  & 30 \\
+  h5018c.txt & 7810  & 30 \\
+  h5020a.txt & 10657 & 30 \\
+  h5020b.txt & 9971  & 30 \\
+  h5020c.txt & 9070  & 30 \\
+  \caption{Resultados para a Metaheurística}
   \label{meta}
-\end{table}
+\end{longtable}
 
 \subsection{PLI}
-\begin{table}[h]
-  \centering
-  \begin{tabular}{c c c c c}
-    Dataset & Função Objetivo & Lim. dual & Nós explorados  & Tempo de execução(s) \\
-    e0806.dat & 4   & 4  & 75     & 0.02   \\
-    e1006.dat & 12  & 12 & 1645   & 0.79   \\
-    e1008.dat & 24  & 24 & 2999   & 1.72   \\
-    e1010.dat & 51  & 51 & 21849  & 21.26  \\
-    e1206.dat & 22  & 22 & 67251  & 63.17  \\
-    e1208.dat & 80  & 0  & 105249 & 180.01 \\
-    e1210.dat & 81  & 4  & 104101 & 180.01 \\
-    e1211.dat & 113 & 0  & 78081  & 180.01 \\
-    e1410.dat & 125 & 0  & 81965  & 180.02 \\
-    e1411.dat & 177 & 0  & 69353  & 180.01 \\
-    e1808.dat & 191 & 0  & 67057  & 180.02 \\
-  \end{tabular}
+Os resultados do PLI podem ser vistos na Tabela \ref{pli}.
+
+\begin{longtable}{c c c c c}
+  Dataset & Função Objetivo & Lim. dual & Nós explorados & Tempo de execução(s) \\
+  \hline
+  \endhead
+  e0806.dat & 4   & 4  & 75     & 0.02   \\
+  e1006.dat & 12  & 12 & 1645   & 0.79   \\
+  e1008.dat & 24  & 24 & 2999   & 1.72   \\
+  e1010.dat & 51  & 51 & 21849  & 21.26  \\
+  e1206.dat & 22  & 22 & 67251  & 63.17  \\
+  e1208.dat & 80  & 0  & 105249 & 180.01 \\
+  e1210.dat & 81  & 4  & 104101 & 180.01 \\
+  e1211.dat & 113 & 0  & 78081  & 180.01 \\
+  e1410.dat & 125 & 0  & 81965  & 180.02 \\
+  e1411.dat & 177 & 0  & 69353  & 180.01 \\
+  e1808.dat & 191 & 0  & 67057  & 180.02 \\
   \caption{Resultados para o PLI}
   \label{pli}
-\end{table}
+\end{longtable}
 
 \subsection{Branch and Bound}
-\begin{table}[h]
-  \centering
-  \begin{tabular}{c c c c c}
-  Dataset & Função Objetivo & Lim. dual & Nós explorados  & Tempo de execução(s) \\
+Os resultados do B\&B podem ser vistos na Tabela \ref{bnb}.
+
+\begin{longtable}{c c c c c}
+  Dataset & Função Objetivo & Lim. dual & Nós explorados & Tempo de execução(s) \\
+  \hline
+  \endhead
   e0806.txt & 4   & 4   & 75       & 0.10 \\
   e1006.txt & 12  & 12  & 1334     & 0.10 \\
   e1008.txt & 24  & 24  & 388      & 0.10 \\
@@ -304,10 +364,9 @@ Os experimentos a seguir foram executados em um Intel Core i7-4700MQ 2.40GHz com
   e1410.txt & 115 & 115 & 504148   & 3.62 \\
   e1411.txt & 132 & 132 & 256840   & 2.38 \\
   e1808.txt & 135 & 135 & 12127193 & 139.70 \\
-  \end{tabular}
   \caption{Resultados para o Branch and Bound}
   \label{bnb}
-\end{table}
+\end{longtable}
 
 \section{Conclusão}
 TODO
