@@ -3,6 +3,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage{mathtools}
 \usepackage{amssymb}
+\usepackage[a4paper,left=3cm,right=3cm,top=3cm,bottom=3cm]{geometry}
 
 \title{Relatório MC658}
 \author{Tiago L. Gimenes - 118827\\
@@ -16,8 +17,8 @@ Neste trabalho tentamos atacar o problema de ordenação de cenas através de tr
 abordagens diferentes. Primeiramente com algoritmos exatos (PLI e B\&B) e em seguida
 uma metaheurística (algoritmo genético). O algoritmo genético se mostrou muito bom
 em 10/11 experimentos, errando em, ao máximo, 50 unidades. O algoritmo de B\&B
-proposto se mostrou capaz de resolver instancias relativamente grandes (com 18 cenas)
-, equanto que o PLI se mostrou como um bom validador de resultados para os outros
+proposto se mostrou capaz de resolver instâncias relativamente grandes (com 18 cenas),
+enquanto que o PLI se mostrou como um bom validador de resultados para os outros
 algoritmos.
 
 \section{Metaheurística}
@@ -234,17 +235,33 @@ Os experimentos a seguir foram executados em um Intel Core i7-4700MQ 2.40GHz com
   \centering
   \begin{tabular}{c c c}
     Dataset & Função Objetivo & Tempo de execução(s) \\
-    e0806.txt & 4   & 30 \\
-    e1006.txt & 12  & 30 \\
-    e1008.txt & 74  & 30 \\
-    e1010.txt & 451 & 30 \\
-    e1206.txt & 26  & 30 \\
-    e1208.txt & 69  & 30 \\
-    e1210.txt & 115 & 30 \\
-    e1211.txt & 113 & 30 \\
-    e1410.txt & 120 & 30 \\
-    e1411.txt & 137 & 30 \\
-    e1808.txt & 145 & 30 \\
+    h3016a.txt & 4952  & 30 \\
+    h3016b.txt & 3375  & 30 \\
+    h3016c.txt & 3750  & 30 \\
+    h3018a.txt & 5648  & 30 \\
+    h3018b.txt & 6303  & 30 \\
+    h3018c.txt & 4445  & 30 \\
+    h3020a.txt & 6538  & 30 \\
+    h3020b.txt & 4998  & 30 \\
+    h3020c.txt & 5811  & 30 \\
+    h4016a.txt & 4640  & 30 \\
+    h4016b.txt & 4946  & 30 \\
+    h4016c.txt & 3805  & 30 \\
+    h4018a.txt & 6046  & 30 \\
+    h4018b.txt & 5436  & 30 \\
+    h4018c.txt & 5439  & 30 \\
+    h4020a.txt & 8452  & 30 \\
+    h4020b.txt & 6287  & 30 \\
+    h4020c.txt & 5846  & 30 \\
+    h5016a.txt & 7533  & 30 \\
+    h5016b.txt & 6092  & 30 \\
+    h5016c.txt & 11435 & 30 \\
+    h5018a.txt & 11221 & 30 \\
+    h5018b.txt & 6743  & 30 \\
+    h5018c.txt & 7810  & 30 \\
+    h5020a.txt & 10657 & 30 \\
+    h5020b.txt & 9971  & 30 \\
+    h5020c.txt & 9070  & 30 \\
   \end{tabular}
   \caption{Resultados para a Metaheurística(algoritmo genético)}
   \label{meta}
