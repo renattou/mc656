@@ -1,6 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
-//  @file: simmulated_anneling.hpp
+//  @file: metaheuristic.hpp
+//  @author: Renato Landim Vargas
 //  @time: 2017-11-17T05:18:14.072Z
 //
 //  @brief TODO
@@ -13,16 +14,13 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 // Constants
-const float T_ZERO = 100; // Initial temperature
-const float K = 1; // Constant for probability
-const short N_STEPS = 10; // Number maximum of steps without improving solution
 const short N_MEMBERS = 25; // Size of population (use odd numbers to crossover all but the fittest)
 const float MUTATION_RATE = 0.01f; // Probability of mutating a gene
 const float CROSSOVER_MIN_RATE = 0.5f; // Min percentage of genes to be crossed-over
 const float CROSSOVER_MAX_RATE = 0.8f; // Max percentage of genes to be crossed-over
 
 ////////////////////////////////////////////////////////////////////////////////
-
+// Auxiliary function to calculate the total cost of a solution
 int get_cost(solution& sol)
 {
   int cost = 0;
@@ -50,7 +48,7 @@ int get_cost(solution& sol)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-
+// Completes solution sol with a greedy approach
 void greedy_solution(solution& sol)
 {
   // List of pairs (scene, scene cost)
@@ -78,118 +76,7 @@ void greedy_solution(solution& sol)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-
-void get_neighbour(solution& sol, solution& new_sol)
-{
-  // Copies solution
-  new_sol = sol;
-
-  // Randomizes two scenes to swap
-  short idx1 = rand() % nscenes;
-  short idx2 = idx1;
-  while (idx1 == idx2) {
-    idx2 = rand() % nscenes;
-  }
-
-  // Swaps scenes
-  new_sol.sol[idx1] = sol.sol[idx2];
-  new_sol.sol[idx2] = sol.sol[idx1];
-
-  // Update lower bound
-  new_sol.lower_bound = get_cost(new_sol);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-float get_probability(float cost_diff, float temperature)
-{
-  return std::exp(-cost_diff / (K * temperature));
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-float update_temperature(float fraction)
-{
-  fraction = std::min(fraction, 1.0f);
-  return (1 - fraction) * T_ZERO;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void simmulated_anneling(float time_max)
-{
-  // Runs greedy algorithm for initial solution
-  best_sol = solution(nscenes);
-  greedy_solution(best_sol);
-  solution cur_sol(best_sol);
-  std::cout << "Iteration 0 -> Best: " << best_sol.lower_bound << std::endl;
-
-  // Initialization
-  auto time_start = std::chrono::high_resolution_clock::now();
-  auto time_now = std::chrono::high_resolution_clock::now();
-  std::chrono::duration<float, std::milli> time_delta = time_start - time_now;
-  float temperature = T_ZERO;
-
-  // Run until temperature reaches 0
-  int iteration = 0;
-  while (temperature > 0) {
-    // Generate new solution for a maximum of N steps without improvement
-    for (short i = 0; i < N_STEPS; i++) {
-      // Gets new solution
-      iteration++;
-      solution new_sol;
-      get_neighbour(cur_sol, new_sol);
-
-      // Gets difference in cost
-      int cost_diff = new_sol.lower_bound - cur_sol.lower_bound;
-
-      // Accepts better solution always
-      if (cost_diff <= 0) {
-        cur_sol = new_sol;
-        i = -1; // Resets max steps counter
-
-        // Accepts best solution
-        if (new_sol.lower_bound < best_sol.lower_bound) {
-          best_sol = new_sol;
-
-          // Prints current results
-          std::cout << "Iteration " << iteration;
-          std::cout << " -> Best: " << best_sol.lower_bound;
-          std::cout << " / Temperature: " << temperature;
-          std::cout << " / Time: " << time_delta.count() / 1000 << std::endl;
-        }
-      }
-      // Accepts worse solution with some probability
-      else {
-        float probability = get_probability(cost_diff, temperature);
-        float random_probability = (double) rand() / (RAND_MAX);
-
-        if (random_probability >= probability) {
-          cur_sol = new_sol;
-        }
-      }
-
-      // Updates and check timer
-      time_now = std::chrono::high_resolution_clock::now();
-      time_delta = time_now - time_start;
-      if (time_delta.count() >= time_max) {
-        break;
-      }
-    }
-
-    // Updates temperature
-    temperature = update_temperature(time_delta.count() / time_max);
-  }
-
-  // Prints final results
-  std::cout << "Iteration " << iteration;
-  std::cout << " -> Best: " << best_sol.lower_bound;
-  std::cout << " / Temperature: " << temperature;
-  std::cout << " / Time: " << time_delta.count() / 1000 << std::endl;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
+// Completes solution sol with a random approach
 void random_solution(solution& sol)
 {
   // List of scenes
@@ -216,7 +103,7 @@ void random_solution(solution& sol)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-
+// Gets the fittest individual on a population
 solution get_fittest(std::vector<solution>& population, int& total_fitness)
 {
   int fittest_idx = 0;
@@ -237,7 +124,7 @@ solution get_fittest(std::vector<solution>& population, int& total_fitness)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-
+// Performs one of the possible types of crossover on two "parents"
 void crossover(solution& individual_1, solution& individual_2)
 {
   // Chooses crossover type
@@ -315,7 +202,7 @@ void crossover(solution& individual_1, solution& individual_2)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-
+// Performs one of the possible types of mutation on an individual
 void mutate(solution& individual)
 {
   // Chooses mutation type
@@ -354,7 +241,7 @@ void mutate(solution& individual)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-
+// Chooses on individual by the roulette method
 int roulette(std::vector<solution>& population, int total_fitness)
 {
   // Randomizes roulette range
@@ -373,7 +260,7 @@ int roulette(std::vector<solution>& population, int total_fitness)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-
+// Evolves a population to the next generation
 void evolve_population(std::vector<solution>& population, int total_fitness)
 {
   // Creates new population
@@ -410,7 +297,7 @@ void evolve_population(std::vector<solution>& population, int total_fitness)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-
+// Performs genetic algorithm meta heuristics
 void genetic_algorithm(float time_max)
 {
   // Creates population

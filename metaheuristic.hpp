@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 //  @file: metaheuristic.hpp
-//  @author: Tiago Lobato Gimenes (tlgimenes@gmail.com)
+//  @author: Renato Landim Vargas
 //  @time: 2017-11-17T05:16:29.314Z
 //
 //  @brief TODO
@@ -21,9 +21,6 @@ void greedy_solution(solution& sol);
 
 // Completes solution sol with a random approach
 void random_solution(solution& sol);
-
-// Performs simmulated_anneling meta heuristics
-void simmulated_anneling(float time_max);
 
 // Performs genetic algorithm meta heuristics
 void genetic_algorithm(float time_max);
