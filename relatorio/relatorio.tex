@@ -19,7 +19,7 @@
 Neste trabalho tentamos atacar o problema de ordenação de cenas através de três
 abordagens diferentes. Primeiramente com algoritmos exatos (PLI e B\&B) e em seguida
 uma metaheurística (algoritmo genético). O algoritmo genético se mostrou satisfatório,
-mas em vários casos ficou preso em locais mínimos em pouco tempo de execução. O algoritmo de B\&B
+mas em vários casos ficou preso em mínimos locais apos pouco tempo de execução. O algoritmo de B\&B
 proposto se mostrou capaz de resolver instâncias relativamente grandes (com 18 cenas),
 enquanto que o PLI se mostrou como um bom validador de resultados para os outros
 algoritmos.
@@ -369,6 +369,10 @@ Os resultados do B\&B podem ser vistos na Tabela \ref{bnb}.
 \end{longtable}
 
 \section{Conclusão}
-TODO
+Comparando os tempos de execução dos algoritmos de Branch and Bound e do PLI, observamos que o primeiro obteve uma performance muito superior ao ultimo para instancias grandes, evidenciando sua preferencia para implementacoes para o problema em questao. Observa-se também que ambas implementacoes encontraram os mesmos valores finais para limitantes inferiores e superiores, evidenciando a possivel corretude da formulacao do PLI e da codificação do Branch and Bound.
+
+Ao executar a metaheurística nas mesmas instancias usadas nos algoritmos exatos, observamos que ela, geralmente, nao ficava muito longe dos valores otimos das solucoes, com excessao de uma instancia, onde ela ficou significativamente distante do otimo. Também notamos que ela convergia rapidamente, mas ficava presa muito facilmente em minimos locais, evidenciando uma ineficiencia na estratégia de mutação.
+
+Uma possivel estratégia futura de implementação seria de tentar incorporar o algoritmo de B\&B na metaheurística com o intuito de fazer com que ela saia dos minimos locais e assim melhorar a qualidade da solução.
 
 \end{document}
